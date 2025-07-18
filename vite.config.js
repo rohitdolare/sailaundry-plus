@@ -13,7 +13,7 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
         name: 'SaiLaundry+',
-        short_name: 'LaundryApp',
+        short_name: 'SaiLaundry+',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
