@@ -7,6 +7,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+       workbox: {
+       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5 MB
+     },
       includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
         name: 'SaiLaundry+',
