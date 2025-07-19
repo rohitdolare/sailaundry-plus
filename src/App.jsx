@@ -1,36 +1,54 @@
-import { useState } from "react";
-import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+
+// Pages
 import HomePage from "./pages/HomePage";
 import OrdersPage from "./pages/OrdersPage";
 import SettingPage from "./pages/SettingPage";
-import MainLayout from "./layouts/MainLayout";
-import LoginPage from "./pages/LoginPage";
-import ProtectedRoute from "./components/ProtectedRoute";
 import ContactPage from "./pages/ContactPage";
 import PlaceOrderPage from "./pages/PlaceOrderPage";
 
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
+
+// Route Guards
+import ProtectedRoute from "./components/ProtectedRoute";
+import CheckUserProfile from "./components/CheckUserProfile";
+
 function App() {
-
   return (
-   <Routes>
-      {/* Public Route */}
+    <Routes>
+      {/* 🔓 Public Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
 
-      {/* Protected Routes */}
+      {/* 👤 First-Time User Profile Setup */}
+      <Route
+        path="/profile-setup"
+        element={
+          <ProtectedRoute>
+            <ProfileSetupPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 🔒 Protected Routes with Profile Check */}
       <Route
         path="/"
         element={
           <ProtectedRoute>
-            <MainLayout />
+           
+              <MainLayout />
+           
           </ProtectedRoute>
         }
       >
         <Route index element={<HomePage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="settings" element={<SettingPage />} />
-         <Route path="contact" element={<ContactPage />} />
-         <Route path="place-order" element={<PlaceOrderPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="place-order" element={<PlaceOrderPage />} />
       </Route>
     </Routes>
   );
