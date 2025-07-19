@@ -9,6 +9,8 @@ import {
   LogOut,
   Phone,
   Menu,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 const MainLayout = () => {
@@ -19,7 +21,22 @@ const MainLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Close sidebar when clicked outside
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
+
+  const toggleTheme = () => setDarkMode(!darkMode);
+
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (
@@ -48,38 +65,58 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen md:flex-row bg-slate-100 text-gray-800">
+    <div className="flex flex-col min-h-screen md:flex-row bg-slate-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
       {/* Mobile Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-white shadow z-10 flex items-center justify-between px-4 py-3">
-        <h2 className="text-lg font-bold text-sky-600">SaiLaundry+</h2>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-          <Menu size={24} className="text-sky-700" />
-        </button>
+      <header className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow z-20 flex items-center justify-between px-4 py-3">
+        <h2 className="text-lg font-bold text-sky-600 dark:text-sky-400">SaiLaundry+</h2>
+        <div className="flex items-center gap-4">
+          <button onClick={toggleTheme} className="hover:scale-105 transition">
+            {darkMode ? (
+              <Sun size={22} className="text-yellow-400" />
+            ) : (
+              <Moon size={22} className="text-gray-700" />
+            )}
+          </button>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+            <Menu size={24} className="text-sky-700 dark:text-sky-300" />
+          </button>
+        </div>
       </header>
 
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
         className={`
-          fixed top-0 left-0 min-h-screen w-60 bg-white text-gray-900 border-r z-20 p-5 space-y-4
-          transform transition-transform duration-300 shadow-md
+          fixed top-0 left-0 min-h-screen w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+          text-gray-900 dark:text-gray-100 z-30 p-5 space-y-4
+          transform transition-transform duration-300 shadow-lg
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:static md:block
         `}
       >
-        <h2 className="text-xl font-extrabold text-sky-600 mb-6 hidden md:block">
+        <h2 className="text-2xl font-extrabold text-sky-600 dark:text-sky-400 mb-6 hidden md:block tracking-tight">
           SaiLaundry+
         </h2>
-        <nav className="space-y-2">
+
+        {/* Desktop Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 dark:bg-gray-700 hover:bg-sky-100 dark:hover:bg-gray-600 transition"
+        >
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          {darkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+
+        <nav className="space-y-1">
           {navItems.map(({ path, label, icon }) => (
             <Link
               key={path}
               to={path}
               onClick={() => setIsSidebarOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
                 activePath === path
-                  ? "bg-sky-100 text-sky-700 font-semibold"
-                  : "hover:bg-slate-100"
+                  ? "bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
               }`}
             >
               {icon}
@@ -98,8 +135,8 @@ const MainLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 pt-16 md:pt-6 overflow-auto">
-        <div className="max-w-6xl mx-auto p-6">
+      <main className="flex-1 pt-16 md:pt-6 overflow-auto bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto px-4 py-6">
           <Outlet />
         </div>
       </main>

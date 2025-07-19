@@ -61,11 +61,11 @@ const OrdersPage = () => {
     .filter(
       (order) => selectedStatus === "All" || order.status === selectedStatus,
     )
-    .sort((a, b) => {
-      return sortOrder === "asc"
+    .sort((a, b) =>
+      sortOrder === "asc"
         ? new Date(a.date) - new Date(b.date)
-        : new Date(b.date) - new Date(a.date);
-    });
+        : new Date(b.date) - new Date(a.date),
+    );
 
   return (
     <>
@@ -80,15 +80,15 @@ const OrdersPage = () => {
         <div className="mt-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
           {/* Status Filter */}
           <div className="flex flex-wrap items-center gap-2">
-            <Filter size={18} className="text-gray-500" />
+            <Filter size={18} className="text-gray-500 dark:text-gray-400" />
             {statusOptions.map((status) => (
               <button
                 key={status}
                 onClick={() => setSelectedStatus(status)}
-                className={`rounded-full border px-3 py-1 text-sm font-medium ${
+                className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
                   selectedStatus === status
                     ? "border-blue-600 bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                 }`}
               >
                 {status}
@@ -99,7 +99,7 @@ const OrdersPage = () => {
           {/* Sort */}
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className="flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
           >
             {sortOrder === "asc" ? (
               <SortAsc size={18} />
@@ -113,23 +113,25 @@ const OrdersPage = () => {
         {/* Order List */}
         <div className="mt-6 space-y-4">
           {filteredOrders.length === 0 ? (
-            <p className="mt-10 text-center text-gray-500">No orders found.</p>
+            <p className="mt-10 text-center text-gray-500 dark:text-gray-400">
+              No orders found.
+            </p>
           ) : (
             filteredOrders.map((order) => (
               <div
                 key={order.id}
-                className="cursor-pointer rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md"
+                className="cursor-pointer rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md dark:bg-gray-800 dark:hover:bg-gray-700"
                 onClick={() => setSelectedOrder(order)}
               >
                 <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-semibold text-gray-800">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                       {order.id}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Placed on {order.date}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       Items: {order.items.join(", ")}
                     </p>
                   </div>
@@ -137,11 +139,11 @@ const OrdersPage = () => {
                   <div className="mt-2 flex items-center gap-3 md:mt-0">
                     <div className="flex items-center gap-1">
                       {getStatusIcon(order.status)}
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-gray-700 dark:text-gray-200">
                         {order.status}
                       </span>
                     </div>
-                    <span className="text-md font-medium text-gray-900">
+                    <span className="text-md font-medium text-gray-900 dark:text-white">
                       ₹{order.total}
                     </span>
                   </div>
