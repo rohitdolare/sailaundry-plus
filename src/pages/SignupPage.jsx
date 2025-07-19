@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { toast } from "react-hot-toast";
+import SaiLaundryLogo from "../components/SaiLaundryLogo";
+import { useAuth } from "../contexts/AuthContext";
 
 const SignupPage = () => {
   const [fullName, setFullName] = useState("");
@@ -11,30 +14,72 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const {login} =useAuth();
+
+  const validate = () => {
+  // Basic full name validation
+  if (fullName.trim().length < 3) {
+    toast.error("Full name must be at least 3 characters long.");
+    return false;
+  }
+
+  // Mobile number validation (10 digits, numeric only)
+  const mobileRegex = /^[0-9]{10}$/;
+  if (!mobileRegex.test(mobile)) {
+    toast.error("Enter a valid 10-digit mobile number.");
+    return false;
+  }
+
+  // Email validation (basic regex)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    toast.error("Enter a valid email address.");
+    return false;
+  }
+
+  // Password validation (minimum 6 characters)
+  if (password.length < 6) {
+    toast.error("Password must be at least 6 characters.");
+    return false;
+  }
+
+  return true; // ✅ all good
+};
+
 
   const handleSignup = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCred.user;
+  try {
+    // 1. Create user
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
 
-      await setDoc(doc(db, "users", user.uid), {
-        name: fullName,
-        mobile,
-        email,
-        createdAt: serverTimestamp(),
-      });
+    // 2. Save user profile in Firestore
+    const userData = {
+      name: fullName,
+      mobile,
+      email,
+      createdAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, "users", user.uid), userData);
 
-      navigate("/");
-    } catch (error) {
-      console.error("Signup error:", error);
-      alert("Signup failed: " + error.message);
-    }
+    // 3. Save user to auth context (just like login)
+    login({ ...userData, uid: user.uid }); // ✅ pass profile info
 
-    setLoading(false);
-  };
+    // 4. Redirect
+    toast.success("🎉 Welcome! You're now signed in.");
+    navigate("/");
+
+  } catch (error) {
+    console.error("Signup failed:", error);
+    toast.error("Signup failed: " + error.message);
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#ffe3ec] via-[#d2f2ff] to-[#f5e0ff] px-4 py-10">
@@ -42,18 +87,14 @@ const SignupPage = () => {
         
         {/* Left side: Branding/info */}
         <div className="text-center md:text-left space-y-4">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-pink-700">Join SaiLaundry+</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-pink-700">Join Sai Laundry+</h1>
           <p className="text-lg text-gray-700">
             Create your account to manage laundry orders, schedule pickups, and enjoy a seamless experience.
           </p>
           <p className="text-base text-gray-600">
             One-time signup. Lifetime convenience.
           </p>
-          <img
-            src="/logo.svg"
-            alt="SaiLaundry+ Logo"
-            className="w-40 h-auto mt-6 mx-auto md:mx-0"
-          />
+          <SaiLaundryLogo/>
         </div>
 
         {/* Right side: Signup form */}

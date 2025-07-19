@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import SaiLaundryLogo from "../components/SaiLaundryLogo";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -44,18 +45,14 @@ const LoginPage = () => {
         
         {/* 👉 Left: Branding / Info */}
         <div className="text-center md:text-left space-y-4">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-800">Welcome to SaiLaundry+</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-800">Welcome to Sai Laundry+</h1>
           <p className="text-lg text-gray-700">
             Your clothes, our care. Track orders, schedule pickups, and manage your laundry seamlessly — all in one place.
           </p>
           <p className="text-base text-gray-600">
             Trusted by 1000+ customers. Fast. Reliable. Affordable.
           </p>
-          <img
-            src="/logo.svg"
-            alt="SaiLaundry+ Logo"
-            className="w-40 h-auto mt-6 mx-auto md:mx-0"
-          />
+          <SaiLaundryLogo/>
         </div>
 
         {/* 👉 Right: Login Card */}

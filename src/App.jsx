@@ -15,42 +15,45 @@ import ProfileSetupPage from "./pages/ProfileSetupPage";
 // Route Guards
 import ProtectedRoute from "./components/ProtectedRoute";
 import CheckUserProfile from "./components/CheckUserProfile";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <Routes>
-      {/* 🔓 Public Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+    <>
+      <Toaster position="top-center" />
 
-      {/* 👤 First-Time User Profile Setup */}
-      <Route
-        path="/profile-setup"
-        element={
-          <ProtectedRoute>
-            <ProfileSetupPage />
-          </ProtectedRoute>
-        }
-      />
+      <Routes>
+        {/* 🔓 Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
 
-      {/* 🔒 Protected Routes with Profile Check */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-           
+        {/* 👤 First-Time User Profile Setup */}
+        <Route
+          path="/profile-setup"
+          element={
+            <ProtectedRoute>
+              <ProfileSetupPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🔒 Protected Routes with Profile Check */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
               <MainLayout />
-           
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<HomePage />} />
-        <Route path="orders" element={<OrdersPage />} />
-        <Route path="settings" element={<SettingPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="place-order" element={<PlaceOrderPage />} />
-      </Route>
-    </Routes>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<HomePage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="settings" element={<SettingPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="place-order" element={<PlaceOrderPage />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

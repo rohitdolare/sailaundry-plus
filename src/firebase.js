@@ -3,13 +3,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// ✅ Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyC5O0Sa8-FQ1h7NUu-Nw4JlkUefTdV7KPI",
-  authDomain: "sailaundry-plus.firebaseapp.com",
-  projectId: "sailaundry-plus",
-  storageBucket: "sailaundry-plus.appspot.com",
-  messagingSenderId: "404750163852",
-  appId: "1:404750163852:web:8e1ccf39888c31c180c0a9"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
