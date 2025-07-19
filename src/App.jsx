@@ -7,9 +7,10 @@ import SettingPage from "./pages/SettingPage";
 import MainLayout from "./layouts/MainLayout";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ContactPage from "./pages/ContactPage";
+import PlaceOrderPage from "./pages/PlaceOrderPage";
 
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
    <Routes>
@@ -28,6 +29,8 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="settings" element={<SettingPage />} />
+         <Route path="contact" element={<ContactPage />} />
+         <Route path="place-order" element={<PlaceOrderPage />} />
       </Route>
     </Routes>
   );
