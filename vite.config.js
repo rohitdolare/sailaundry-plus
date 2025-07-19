@@ -7,9 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-       workbox: {
-       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5 MB
-     },
+      workbox: {
+        // Increase cache size limit to 10 MB
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+      },
       includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
         name: 'SaiLaundry+',
@@ -33,4 +34,8 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    // Increase chunk size warning threshold to 2 MB
+    chunkSizeWarningLimit: 2000,
+  },
 });
