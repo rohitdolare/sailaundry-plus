@@ -3,6 +3,8 @@ import { db } from "../../firebase";
 
 // 🔹 Fetch user data
 export const getUserProfile = async (uid) => {
+  console.log("getting user");
+  
   const docRef = doc(db, "users", uid);
   const snap = await getDoc(docRef);
   return snap.exists() ? snap.data() : null;

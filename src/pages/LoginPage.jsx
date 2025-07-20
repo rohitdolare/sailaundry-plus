@@ -13,31 +13,45 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-      const userRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(userRef);
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
 
-      if (docSnap.exists()) {
-        const profileData = docSnap.data();
-        login(profileData);
-        navigate("/");
-      } else {
-        alert("User profile not found. Please complete signup.");
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
-      alert("Login failed: " + error.message);
+    if (docSnap.exists()) {
+      const profileData = docSnap.data();
+
+      // ✅ Build consistent user object
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      const finalUser = {
+        uid: user.uid,
+        name: profileData.name,
+        mobile: profileData.mobile,
+        email: profileData.email,
+        createdAt: profileData.createdAt,
+        expiresAt,
+      };
+
+      // ✅ Set in auth context
+      login(finalUser);
+      navigate("/");
+    } else {
+      alert("User profile not found. Please complete signup.");
     }
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Login failed: " + error.message);
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#c2f0f7] via-[#e8d4ff] to-[#fef6ff] px-4 py-10">

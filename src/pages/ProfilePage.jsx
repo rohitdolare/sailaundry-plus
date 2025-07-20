@@ -18,6 +18,9 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+   
+           console.log("use",user);
+
     if (user?.uid) {
       getUserProfile(user.uid).then((data) => {
         setProfile(data);
