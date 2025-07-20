@@ -15,11 +15,12 @@ import SignupPage from "./pages/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 import CatalogPage from "./pages/CatalogPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="bottom-center" />
 
       <Routes>
         {/* 🔓 Public Routes */}
@@ -41,7 +42,8 @@ function App() {
           <Route path="settings" element={<SettingPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="place-order" element={<PlaceOrderPage />} />
-          <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="catalog" element={<CatalogPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </>

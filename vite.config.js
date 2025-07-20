@@ -15,6 +15,7 @@ export default defineConfig({
       manifest: {
         name: 'SaiLaundry+',
         short_name: 'SaiLaundry+',
+        description: "Laundry Store Management App",
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
