@@ -11,6 +11,7 @@ import {
   Menu,
   Sun,
   Moon,
+  Tags,
 } from "lucide-react";
 
 const MainLayout = () => {
@@ -47,7 +48,6 @@ const MainLayout = () => {
         setIsSidebarOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isSidebarOpen]);
@@ -60,8 +60,9 @@ const MainLayout = () => {
   const navItems = [
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/orders", label: "Orders", icon: <ShoppingCart size={18} /> },
+    { path: "/catalog", label: "Service Catalog", icon: <Tags size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
-    { path: "/contact", label: "Contact", icon: <Phone size={18} /> },
+    { path: "/contact", label: "Support", icon: <Phone size={18} /> },
   ];
 
   return (
@@ -70,14 +71,10 @@ const MainLayout = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow z-20 flex items-center justify-between px-4 py-3">
         <h2 className="text-lg font-bold text-sky-600 dark:text-sky-400">SaiLaundry+</h2>
         <div className="flex items-center gap-4">
-          <button onClick={toggleTheme} className="hover:scale-105 transition">
-            {darkMode ? (
-              <Sun size={22} className="text-yellow-400" />
-            ) : (
-              <Moon size={22} className="text-gray-700" />
-            )}
+          <button onClick={toggleTheme} className="hover:scale-105 transition" aria-label="Toggle Theme">
+            {darkMode ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-gray-700" />}
           </button>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} aria-label="Open Menu">
             <Menu size={24} className="text-sky-700 dark:text-sky-300" />
           </button>
         </div>
@@ -87,7 +84,7 @@ const MainLayout = () => {
       <aside
         ref={sidebarRef}
         className={`
-          fixed top-0 left-0 min-h-screen w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+          fixed top-0 left-0 min-h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
           text-gray-900 dark:text-gray-100 z-30 p-5 space-y-4
           transform transition-transform duration-300 shadow-lg
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -107,7 +104,7 @@ const MainLayout = () => {
           {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1" role="navigation" aria-label="Main Navigation">
           {navItems.map(({ path, label, icon }) => (
             <Link
               key={path}

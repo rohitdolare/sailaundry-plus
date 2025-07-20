@@ -10,12 +10,11 @@ import PlaceOrderPage from "./pages/PlaceOrderPage";
 
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import ProfileSetupPage from "./pages/ProfileSetupPage";
 
 // Route Guards
 import ProtectedRoute from "./components/ProtectedRoute";
-import CheckUserProfile from "./components/CheckUserProfile";
 import { Toaster } from "react-hot-toast";
+import CatalogPage from "./pages/CatalogPage";
 
 function App() {
   return (
@@ -27,16 +26,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* 👤 First-Time User Profile Setup */}
-        <Route
-          path="/profile-setup"
-          element={
-            <ProtectedRoute>
-              <ProfileSetupPage />
-            </ProtectedRoute>
-          }
-        />
-
+       
         {/* 🔒 Protected Routes with Profile Check */}
         <Route
           path="/"
@@ -51,6 +41,7 @@ function App() {
           <Route path="settings" element={<SettingPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="place-order" element={<PlaceOrderPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
         </Route>
       </Routes>
     </>
