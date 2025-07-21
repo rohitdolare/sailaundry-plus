@@ -26,7 +26,13 @@ const OrdersPage = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const statusOptions = ["All", "Completed", "In Progress", "Pending", "Pending Pickup"];
+  const statusOptions = [
+    "All",
+    "Completed",
+    "In Progress",
+    "Pending",
+    "Pending Pickup",
+  ];
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -49,7 +55,9 @@ const OrdersPage = () => {
       case "Completed":
         return <PackageCheck className="text-green-500" size={20} />;
       case "In Progress":
-        return <LoaderCircle className="text-blue-500 animate-spin-slow" size={20} />;
+        return (
+          <LoaderCircle className="animate-spin-slow text-blue-500" size={20} />
+        );
       case "Pending Pickup":
       case "Pending":
         return <Clock className="text-yellow-500" size={20} />;
@@ -59,7 +67,9 @@ const OrdersPage = () => {
   };
 
   const filteredOrders = orders
-    .filter((order) => selectedStatus === "All" || order.status === selectedStatus)
+    .filter(
+      (order) => selectedStatus === "All" || order.status === selectedStatus,
+    )
     .sort((a, b) => {
       const aDate = a.createdAt?.toDate?.() || new Date(a.createdAt);
       const bDate = b.createdAt?.toDate?.() || new Date(b.createdAt);
@@ -68,7 +78,10 @@ const OrdersPage = () => {
 
   return (
     <>
-      <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      <OrderDetailsModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
 
       <div className="p-4">
         <PageHeader title="Your Orders" />
@@ -83,7 +96,7 @@ const OrdersPage = () => {
                 onClick={() => setSelectedStatus(status)}
                 className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
                   selectedStatus === status
-                    ? "border-indigo-600 bg-sky-600 text-indigo-600"
+                    ? "bg-sky-600 border-indigo-600 text-indigo-600"
                     : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                 }`}
               >
@@ -96,7 +109,11 @@ const OrdersPage = () => {
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
             className="flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
           >
-            {sortOrder === "asc" ? <SortAsc size={18} /> : <SortDesc size={18} />}
+            {sortOrder === "asc" ? (
+              <SortAsc size={18} />
+            ) : (
+              <SortDesc size={18} />
+            )}
             Sort by Date
           </button>
         </div>
@@ -104,56 +121,63 @@ const OrdersPage = () => {
         {/* Orders List */}
         <div className="mt-6 space-y-6">
           {loading ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">Loading orders...</p>
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              Loading orders...
+            </p>
           ) : filteredOrders.length === 0 ? (
             <p className="mt-10 text-center text-gray-500 dark:text-gray-400">
               No orders found.
             </p>
           ) : (
             filteredOrders.map((order) => {
-              const createdDate = order.createdAt?.toDate?.() || new Date(order.createdAt);
+              const createdDate =
+                order.createdAt?.toDate?.() || new Date(order.createdAt);
               const itemPreview = order.items?.[0];
 
               return (
                 <div
                   key={order.id}
                   onClick={() => setSelectedOrder(order)}
-                  className="cursor-pointer rounded-xl border border-gray-200 bg-gradient-to-br from-white via-sky-50 to-sky-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 p-5 shadow hover:shadow-xl transition-all duration-300"
+                  className="via-sky-50 to-sky-100 cursor-pointer rounded-xl border border-gray-200 bg-gradient-to-br from-white p-5 shadow transition-all duration-300 hover:shadow-xl dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
                     {/* Left Side Info */}
-                    <div className="space-y-1">
+                    <div className="w-full space-y-1 sm:w-auto">
                       <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
                         Order #{order.id}
                       </h3>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                      <p className="flex flex-wrap items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                         <CalendarDays size={16} />
                         {createdDate.toLocaleDateString()}
                       </p>
 
-                      <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      <p className="flex flex-wrap items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
                         <MapPin size={16} />
-                        {order.pickupLocation?.label} – {order.pickupLocation?.address}
+                        {order.pickupLocation?.label} –{" "}
+                        {order.pickupLocation?.address}
                       </p>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                      <p className="flex flex-wrap items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                         <Shirt size={16} />
                         {order.items?.length || 0} item(s)
                         {itemPreview && typeof itemPreview === "object" && (
-                          <> (e.g. {itemPreview.item} × {itemPreview.quantity})</>
+                          <>
+                            {" "}
+                            (e.g. {itemPreview.item} × {itemPreview.quantity})
+                          </>
                         )}
                       </p>
 
                       {order.instructions && (
-                        <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="mt-1 text-sm italic text-gray-500 dark:text-gray-400">
                           “{order.instructions}”
                         </p>
                       )}
                     </div>
 
                     {/* Right Side Info */}
-                    <div className="text-right flex flex-col gap-2 items-end">
+                    <div className="flex w-full flex-col items-end gap-2 text-right sm:w-auto sm:items-end sm:text-right">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(order.status)}
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -161,7 +185,7 @@ const OrdersPage = () => {
                         </span>
                       </div>
 
-                      <span className="flex items-center gap-1 font-bold text-xl text-green-600 dark:text-green-400">
+                      <span className="flex items-center gap-1 text-xl font-bold text-green-600 dark:text-green-400">
                         <IndianRupee size={18} />
                         {order.totalAmount ?? "—"}
                       </span>
