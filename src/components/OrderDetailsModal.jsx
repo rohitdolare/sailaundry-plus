@@ -1,4 +1,15 @@
-import { X, PackageCheck, LoaderCircle, Clock } from "lucide-react";
+import {
+  X,
+  PackageCheck,
+  LoaderCircle,
+  Clock,
+  MapPin,
+  CalendarDays,
+  IndianRupee,
+  User,
+  Phone,
+  Shirt,
+} from "lucide-react";
 
 const OrderDetailsModal = ({ order, onClose }) => {
   if (!order) return null;
@@ -12,20 +23,22 @@ const OrderDetailsModal = ({ order, onClose }) => {
       case "Pending Pickup":
         return <Clock className="text-yellow-500" size={20} />;
       default:
-        return null;
+        return <Clock className="text-gray-400" size={20} />;
     }
   };
 
+  const createdAt = order.createdAt?.toDate?.() || new Date(order.createdAt);
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center md:p-4">
-      {/* Backdrop click layer */}
+      {/* Backdrop */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal */}
       <div
-        className="relative bg-gradient-to-br from-blue-50 via-white to-purple-100 rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-md p-6 max-h-screen overflow-y-auto
-        animate-slide-up md:animate-fade-in
-        md:mt-0 mt-auto"
+        className="relative bg-gradient-to-br from-white via-blue-50 to-purple-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
+          rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg p-6 max-h-screen overflow-y-auto
+          animate-slide-up md:animate-fade-in mt-auto md:mt-0"
       >
         {/* Close */}
         <button
@@ -36,34 +49,82 @@ const OrderDetailsModal = ({ order, onClose }) => {
         </button>
 
         {/* Header */}
-        <div className="mb-5">
+        <div className="mb-4">
           <h2 className="text-xl font-bold text-indigo-700">Order #{order.id}</h2>
-          <p className="text-sm text-gray-600">Placed on {order.date}</p>
+          <p className="text-sm text-gray-600 flex items-center gap-1">
+            <CalendarDays size={16} /> Placed on {createdAt.toLocaleDateString()}
+          </p>
         </div>
 
-        {/* Status */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="font-medium text-gray-700">Status:</span>
-          <span className="flex items-center gap-2 text-sm font-semibold">
-            {getStatusIcon(order.status)} {order.status}
-          </span>
+        {/* Status and Total */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-gray-700">Status:</span>
+            {getStatusIcon(order.status)}
+            <span className="text-sm font-semibold text-gray-700">{order.status}</span>
+          </div>
+          <div className="flex items-center gap-1 font-bold text-green-600 dark:text-green-400">
+            <IndianRupee size={18} /> {order.totalAmount}
+          </div>
         </div>
 
-        {/* Total */}
-        <div className="flex items-center justify-between mb-4">
-          <span className="font-medium text-gray-700">Total:</span>
-          <span className="text-lg font-bold text-emerald-600">₹{order.total}</span>
+        {/* Pickup Info */}
+        <div className="mb-4 space-y-1">
+          <h4 className="font-semibold text-gray-800 dark:text-white">Pickup Details:</h4>
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <CalendarDays size={16} /> {order.pickupDate}
+          </p>
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <Clock size={16} /> {order.pickupTime}
+          </p>
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <MapPin size={16} /> {order.pickupLocation?.label} – {order.pickupLocation?.address}
+          </p>
+        </div>
+
+        {/* User Info */}
+        <div className="mb-4 space-y-1">
+          <h4 className="font-semibold text-gray-800 dark:text-white">Customer Info:</h4>
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <User size={16} /> {order.userName}
+          </p>
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <Phone size={16} /> {order.userMobile}
+          </p>
         </div>
 
         {/* Items */}
-        <div>
-          <h4 className="font-semibold text-gray-800 mb-2">Items:</h4>
-          <ul className="list-disc pl-5 text-gray-700 space-y-1">
-            {order.items.map((item, idx) => (
-              <li key={idx}>{item}</li>
+        <div className="mb-4">
+          <h4 className="font-semibold text-gray-800 dark:text-white mb-2">Items:</h4>
+          <ul className="space-y-2">
+            {order.items?.map((item, idx) => (
+              <li
+                key={idx}
+                className="p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-sm text-sm"
+              >
+                <div className="flex justify-between font-medium">
+                  <span className="flex items-center gap-1">
+                    <Shirt size={14} /> {item.item} ({item.section})
+                  </span>
+                  <span className="text-gray-600 dark:text-gray-300">
+                    x{item.quantity}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  Service: {item.service} • Price: ₹{item.price}
+                </div>
+              </li>
             ))}
           </ul>
         </div>
+
+        {/* Instructions */}
+        {order.instructions && (
+          <div className="mt-4">
+            <h4 className="font-semibold text-gray-800 dark:text-white mb-1">Instructions:</h4>
+            <p className="italic text-sm text-gray-600 dark:text-gray-400">“{order.instructions}”</p>
+          </div>
+        )}
       </div>
     </div>
   );
