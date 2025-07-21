@@ -1,30 +1,24 @@
-// src/pages/CatalogPage.jsx
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase"; // adjust path as per your project
 import PageHeader from "../components/PageHeader";
+import { getCatalog } from "../services/firestore";
 
 const CatalogPage = () => {
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCatalog = async () => {
+   useEffect(() => {
+    const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "catalog"));
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const data = await getCatalog();
         setCatalog(data);
       } catch (error) {
-        console.error("Error fetching catalog:", error);
+        console.error("Failed to load catalog:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCatalog();
+    fetchData();
   }, []);
 
   return (

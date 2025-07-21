@@ -1,5 +1,3 @@
-// src/components/PageHeader.jsx
-
 /**
  * PageHeader - Reusable page title component
  * @param {string} title - The title to display on the page

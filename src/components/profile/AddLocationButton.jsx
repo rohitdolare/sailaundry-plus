@@ -1,4 +1,3 @@
-// components/profile/AddLocationButton.jsx
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import AddLocationModal from "./AddLocationModal";
