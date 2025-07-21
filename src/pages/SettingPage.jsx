@@ -1,4 +1,4 @@
-import { User, Bell, Phone, Mail } from "lucide-react";
+import { Bell } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 
 const SettingPage = () => {

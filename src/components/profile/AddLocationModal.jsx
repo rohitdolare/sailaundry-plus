@@ -16,8 +16,8 @@ const AddLocationModal = ({ isOpen, onClose, onSave }) => {
     if (!label || !address) return;
 
     const newLocation = { label, address };
-    onSave(newLocation); // send to parent
-    onClose(); // will also trigger reset via useEffect
+    onSave(newLocation); 
+    onClose();
   };
 
   if (!isOpen) return null;

@@ -1,4 +1,3 @@
-// src/pages/PlaceOrderPage.jsx
 import { useEffect, useState } from "react";
 import { Calendar, Clock, MapPin, Shirt, StickyNote } from "lucide-react";
 import PageHeader from "../components/PageHeader";

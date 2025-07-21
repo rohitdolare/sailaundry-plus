@@ -6,7 +6,6 @@ import {
   Filter,
   SortAsc,
   SortDesc,
-  Shirt,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader";
