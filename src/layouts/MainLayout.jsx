@@ -12,6 +12,7 @@ import {
   Moon,
   Tags,
   User,
+  PackagePlus,
 } from "lucide-react";
 
 const MainLayout = () => {
@@ -61,9 +62,10 @@ const MainLayout = () => {
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/profile", label: "Profile", icon: <User size={18} /> },
     { path: "/orders", label: "Orders", icon: <ShoppingCart size={18} /> },
+    { path: "/place-order", label: "Place Order", icon: <PackagePlus size={18} /> },
     { path: "/catalog", label: "Service Catalog", icon: <Tags size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
-    { path: "/contact", label: "Support", icon: <Phone size={18} /> },
+    { path: "/contact", label: "Help & Support", icon: <Phone size={18} /> },
   ];
 
   return (
