@@ -139,7 +139,7 @@ const OrdersPage = () => {
                         Location: {order.pickupLocation?.label} – {order.pickupLocation?.address}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Items: {order.items?.length || 0} item(s){itemPreview ? ` (e.g. ${itemPreview.name} x${itemPreview.quantity})` : ""}
+                        Items: {order.items?.length || 0} item(s){itemPreview ? ` (e.g. ${itemPreview.item} x${itemPreview.quantity})` : ""}
                       </p>
                       {order.instructions && (
                         <p className="text-sm italic text-gray-500 dark:text-gray-400">
