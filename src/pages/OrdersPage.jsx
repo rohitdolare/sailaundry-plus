@@ -17,9 +17,11 @@ import PageHeader from "../components/PageHeader";
 import OrderDetailsModal from "../components/OrderDetailsModal";
 import { useAuth } from "../contexts/AuthContext";
 import { getOrdersByUserId } from "../services/firestore";
+import { useNavigate } from "react-router-dom";
 
 const OrdersPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -199,6 +201,14 @@ const OrdersPage = () => {
           )}
         </div>
       </div>
+      {/* Floating Place Order Button */}
+      <button
+        onClick={() => navigate("/place-order")}
+        className="to-sky-500 fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-gradient-to-br from-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl active:scale-100"
+      >
+        <Shirt size={18} className="opacity-90" />
+        <span className="hidden sm:inline">Place Order</span>
+      </button>
     </>
   );
 };

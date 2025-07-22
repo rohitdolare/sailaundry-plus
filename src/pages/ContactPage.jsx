@@ -14,7 +14,7 @@ const ContactPage = () => {
           <ContactItem
             icon={<Phone className="text-sky-600 dark:text-sky-400" size={22} />}
             label="Phone"
-            value="+91 98765 43210"
+            value="+91 91195 47096"
           />
           <ContactItem
             icon={<Mail className="text-sky-600 dark:text-sky-400" size={22} />}
