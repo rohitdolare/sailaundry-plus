@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const AuthContext = createContext();
 const LOCAL_STORAGE_KEY = "auth_user";
 
-export const AuthProvider = ({ children }) => {
+export const  AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 

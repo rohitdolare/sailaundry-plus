@@ -50,7 +50,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
 
         {/* Header */}
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-indigo-700">Order #{order.id}</h2>
+          <h2 className="text-xl font-bold text-indigo-700">Order #{order.orderNumber ?? order.id}</h2>
           <p className="text-sm text-gray-600 flex items-center gap-1">
             <CalendarDays size={16} /> Placed on {createdAt.toLocaleDateString()}
           </p>
