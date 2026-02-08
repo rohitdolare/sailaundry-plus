@@ -146,7 +146,7 @@ const OrdersPage = () => {
                     {/* Left Side Info */}
                     <div className="w-full space-y-1 sm:w-auto">
                       <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
-                        Order #{order.id}
+                        Order #{order.orderNumber ?? order.id}
                       </h3>
 
                       <p className="flex flex-wrap items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
@@ -204,7 +204,7 @@ const OrdersPage = () => {
       {/* Floating Place Order Button */}
       <button
         onClick={() => navigate("/place-order")}
-        className="to-sky-500 fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-gradient-to-br from-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl active:scale-100"
+        className="to-sky-500 fixed bottom-20 right-6 md:bottom-6 z-50 flex items-center gap-2 rounded-full bg-gradient-to-br from-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl active:scale-100"
       >
         <Shirt size={18} className="opacity-90" />
         <span className="hidden sm:inline">Place Order</span>

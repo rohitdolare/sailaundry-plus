@@ -14,7 +14,7 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const {login} =useAuth();
+  useAuth();
 
   const validate = () => {
   // Basic full name validation
@@ -57,21 +57,20 @@ const SignupPage = () => {
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
 
-    // 2. Save user profile in Firestore
+    // 2. Save user profile in Firestore (new users are customers, unverified until admin verifies)
     const userData = {
       name: fullName,
       mobile,
       email,
+      role: "customer",
+      verified: false,
       createdAt: serverTimestamp(),
     };
     await setDoc(doc(db, "users", user.uid), userData);
 
-    // 3. Save user to auth context (just like login)
-    login({ ...userData, uid: user.uid }); // ✅ pass profile info
-
-    // 4. Redirect
-    toast.success("🎉 Welcome! You're now signed in.");
-    navigate("/");
+    // 3. Don't auto-login: only verified customers can login
+    toast.success("Account created. You can sign in once admin verifies your account.");
+    navigate("/login");
 
   } catch (error) {
     console.error("Signup failed:", error);

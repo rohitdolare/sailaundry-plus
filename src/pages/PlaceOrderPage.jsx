@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, Clock, MapPin, Shirt, StickyNote } from "lucide-react";
+import { Calendar, Clock, MapPin, Shirt, StickyNote, Plus, Minus, Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-hot-toast";
@@ -147,31 +147,41 @@ const PlaceOrderPage = () => {
   };
 
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen p-4 transition-colors duration-300">
-      <PageHeader title="Place a New Order" />
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-100 dark:from-indigo-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-pink-100 dark:from-pink-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
+      </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-700 mx-auto mt-6 max-w-3xl space-y-6 rounded-2xl border bg-white p-6 shadow-xl transition-all duration-300"
-      >
+      <div className="relative px-4 py-8">
+        <PageHeader title="Place a New Order" />
+
+        <form
+          onSubmit={handleSubmit}
+          className="mx-auto mt-6 max-w-3xl space-y-6 rounded-3xl bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 p-8 shadow-xl transition-all duration-300"
+        >
         {/* Location */}
-        <div>
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-zinc-800 mb-1 block font-medium dark:text-black">
-              <MapPin size={16} /> Pickup Location
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                <MapPin size={18} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+              Pickup Location
             </label>
             <button
               type="button"
-              className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+              className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition"
               onClick={() => setShowAddLocationModal(true)}
             >
-              + Add Location
+              <Plus size={16} /> Add Location
             </button>
           </div>
           <select
             value={selectedLocationIndex}
             onChange={(e) => setSelectedLocationIndex(parseInt(e.target.value))}
-            className="mt-1 w-full rounded-xl border bg-zinc-100 px-4 py-2 dark:bg-zinc-800 dark:text-black"
+            className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition"
           >
             {locations.map((loc, index) => (
               <option key={index} value={index}>
@@ -183,9 +193,12 @@ const PlaceOrderPage = () => {
 
         {/* Date & Time */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="block font-medium text-zinc-800 dark:text-black mb-1">
-              <Calendar size={16} /> Pickup Date
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <Calendar size={18} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              Pickup Date
             </label>
             <input
               type="date"
@@ -193,12 +206,15 @@ const PlaceOrderPage = () => {
               value={formData.pickupDate}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border bg-zinc-100 px-4 py-2 dark:bg-zinc-800 dark:text-black"
+              className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition"
             />
           </div>
-          <div>
-            <label className="block font-medium text-zinc-800 dark:text-black mb-1">
-              <Clock size={16} /> Pickup Time
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <Clock size={18} className="text-purple-600 dark:text-purple-400" />
+              </div>
+              Pickup Time
             </label>
             <input
               type="time"
@@ -206,7 +222,7 @@ const PlaceOrderPage = () => {
               value={formData.pickupTime}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border bg-zinc-100 px-4 py-2 dark:bg-zinc-800 dark:text-black"
+              className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition"
             />
           </div>
         </div>
@@ -215,20 +231,25 @@ const PlaceOrderPage = () => {
 
         {/* Items Selector */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-zinc-800 dark:text-black">
-            Order Items
-          </h3>
+          <div className="flex items-center gap-2 pb-2 border-b-2 border-gradient-to-r from-indigo-200 to-purple-200 dark:border-slate-700">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30">
+              <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              Order Items
+            </h3>
+          </div>
           {items.map((item, index) => (
             <div
               key={index}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-5 items-center"
+              className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-gradient-to-r from-gray-50 to-gray-50 dark:from-slate-700/50 dark:to-slate-700/30 p-4 rounded-2xl border border-gray-200 dark:border-slate-600 hover:shadow-md transition"
             >
               <select
                 value={item.section}
                 onChange={(e) => handleItemChange(index, "section", e.target.value)}
-                className="rounded-xl border bg-zinc-100 px-3 py-2 dark:bg-zinc-800 dark:text-black"
+                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
-                <option value="">Section</option>
+                <option value="">Select Section</option>
                 {catalog.map((section) => (
                   <option key={section.name} value={section.name}>
                     {section.name}
@@ -239,9 +260,9 @@ const PlaceOrderPage = () => {
               <select
                 value={item.item}
                 onChange={(e) => handleItemChange(index, "item", e.target.value)}
-                className="rounded-xl border bg-zinc-100 px-3 py-2 dark:bg-zinc-800 dark:text-black"
+                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
-                <option value="">Item</option>
+                <option value="">Select Item</option>
                 {catalog
                   .find((sec) => sec.name === item.section)
                   ?.items?.map((it) => (
@@ -254,96 +275,124 @@ const PlaceOrderPage = () => {
               <select
                 value={item.service}
                 onChange={(e) => handleItemChange(index, "service", e.target.value)}
-                className="rounded-xl border bg-zinc-100 px-3 py-2 dark:bg-zinc-800 dark:text-black"
+                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
-                <option value="">Service</option>
+                <option value="">Select Service</option>
                 {catalog
                   .find((sec) => sec.name === item.section)
                   ?.items?.find((it) => it.name === item.item)
                   ?.services?.map((srv) => (
                     <option key={srv.type} value={srv.type}>
-                      {srv.type} ({srv.price} ₹)
+                      {srv.type} (₹{srv.price})
                     </option>
                   ))}
               </select>
 
-              <input
-                type="number"
-                min="1"
-                value={item.quantity}
-                onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value))}
-                className="rounded-xl border bg-zinc-100 px-3 py-2 dark:bg-zinc-800 dark:text-black"
-              />
+              <div className="flex items-center gap-1 rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => handleItemChange(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
+                  disabled={(item.quantity || 1) <= 1}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 disabled:opacity-50 disabled:pointer-events-none transition"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus size={18} />
+                </button>
+                <span className="min-w-[2rem] text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  {item.quantity || 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleItemChange(index, "quantity", (item.quantity || 1) + 1)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 transition"
+                  aria-label="Increase quantity"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
 
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="text-sm text-red-500 hover:underline"
+                className="rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 p-2 transition flex items-center justify-center"
               >
-                Remove
+                <Trash2 size={18} />
               </button>
             </div>
           ))}
           <button
             type="button"
             onClick={handleAddItem}
-            className="text-sm text-blue-600 hover:underline"
+            className="w-full py-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition flex items-center justify-center gap-2"
           >
-            + Add Item
+            <Plus size={18} /> Add Another Item
           </button>
         </div>
 
         {/* Instructions */}
-        <div>
-          <label className="block font-medium text-zinc-800 dark:text-black mb-1">
-            <StickyNote size={16} /> Special Instructions
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+              <StickyNote size={18} className="text-yellow-600 dark:text-yellow-400" />
+            </div>
+            Special Instructions
           </label>
           <textarea
             name="instructions"
             value={formData.instructions}
             onChange={handleChange}
             rows="3"
-            className="w-full rounded-xl border bg-zinc-100 px-4 py-2 dark:bg-zinc-800 dark:text-black"
-            placeholder="e.g. Please handle delicate clothes with care."
+            className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-medium focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-900 transition resize-none"
+            placeholder="e.g. Please handle delicate clothes with care..."
           />
         </div>
 
-        {/* Total Amount */}
-        <div className="text-right text-lg font-semibold text-zinc-800 dark:text-black">
-          Total: ₹
-          {items.reduce((sum, i) => sum + i.price * i.quantity, 0)}
+        {/* Order Summary */}
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700/50 dark:to-slate-700/30 rounded-2xl p-6 border border-indigo-200 dark:border-slate-600">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
+              <p className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                ₹{items.reduce((sum, i) => sum + i.price * i.quantity, 0)}
+              </p>
+            </div>
+            <div className="text-right text-sm text-gray-600 dark:text-gray-400">
+              {items.length} {items.length === 1 ? 'item' : 'items'} selected
+            </div>
+          </div>
         </div>
 
-        {/* Submit */}
-        <div className="text-right">
-          <button
-            type="submit"
-            className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2 font-semibold text-white shadow-md transition duration-300 hover:from-blue-700 hover:to-indigo-700"
-          >
-            Place Order
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+        >
+          <Shirt size={20} />
+          <span>Place Order</span>
+          <ArrowRight size={20} />
+        </button>
       </form>
 
-      {/* Add Location Modal */}
-      <AddLocationModal
-        isOpen={showAddLocationModal}
-        onClose={() => setShowAddLocationModal(false)}
-        onSave={async (newLoc) => {
-          try {
-            await addLocation(user.uid, newLoc);
-            const updatedProfile = await getUserProfile(user.uid);
-            const updatedLocations = updatedProfile?.locations || [];
-            setLocations(updatedLocations);
-            setSelectedLocationIndex(updatedLocations.length - 1);
-            toast.success("Location added!");
-            setShowAddLocationModal(false);
-          } catch (error) {
-            console.error("Failed to add location:", error);
-            toast.error("Failed to add location.");
-          }
-        }}
-      />
+        {/* Add Location Modal */}
+        <AddLocationModal
+          isOpen={showAddLocationModal}
+          onClose={() => setShowAddLocationModal(false)}
+          onSave={async (newLoc) => {
+            try {
+              await addLocation(user.uid, newLoc);
+              const updatedProfile = await getUserProfile(user.uid);
+              const updatedLocations = updatedProfile?.locations || [];
+              setLocations(updatedLocations);
+              setSelectedLocationIndex(updatedLocations.length - 1);
+              toast.success("Location added!");
+              setShowAddLocationModal(false);
+            } catch (error) {
+              console.error("Failed to add location:", error);
+              toast.error("Failed to add location.");
+            }
+          }}
+        />
+      </div>
     </div>
   );
 };

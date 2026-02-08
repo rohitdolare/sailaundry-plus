@@ -1,5 +1,5 @@
 // src/services/firebase/userService.js
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 
 // 🔹 Fetch user profile data
@@ -41,4 +41,24 @@ export const deleteLocation = async (uid, index) => {
 
   locations.splice(index, 1);
   await updateDoc(userRef, { locations });
+};
+
+// 🔹 Get all users (admin only – for creating orders on behalf of customers)
+export const getAllUsers = async () => {
+  try {
+    const snapshot = await getDocs(collection(db, "users"));
+    return snapshot.docs.map((d) => ({
+      uid: d.id,
+      ...d.data(),
+    }));
+  } catch (error) {
+    console.error("Error fetching users (check Firestore rules):", error);
+    return [];
+  }
+};
+
+// 🔹 Admin: set customer verified (only verified customers can login)
+export const updateUserVerified = async (uid, verified) => {
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, { verified: !!verified });
 };
