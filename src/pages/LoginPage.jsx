@@ -8,8 +8,8 @@ import SaiLaundryLogo from "../components/SaiLaundryLogo";
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("rohitdolare05@gmail.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
