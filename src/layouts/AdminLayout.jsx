@@ -3,8 +3,6 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   LayoutDashboard,
-  Package,
-  PackagePlus,
   LogOut,
   Menu,
   Sun,
@@ -12,9 +10,11 @@ import {
   Shield,
   Tags,
   Users,
+  Package,
+  ShoppingCart,
 } from "lucide-react";
 
-const AdminLayout = () => {
+export default function AdminLayout() {
   const location = useLocation();
   const activePath = location.pathname;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,18 +58,18 @@ const AdminLayout = () => {
   };
 
   const adminNavItems = [
-    { path: "/admin", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { path: "/admin/orders", label: "All Orders", icon: <Package size={18} /> },
-    { path: "/admin/create-order", label: "Create Order", icon: <PackagePlus size={18} /> },
-    { path: "/admin/catalog", label: "Catalog", icon: <Tags size={18} /> },
-    { path: "/admin/customers", label: "Customers", icon: <Users size={18} /> },
+    { path: "/admin", label: "Dashboard", icon: <LayoutDashboard size={18} />, exact: true },
+    { path: "/admin/orders", label: "Orders", icon: <Package size={18} />, exact: true },
+    { path: "/admin/create-order", label: "Create Order", icon: <ShoppingCart size={18} />, exact: false },
+    { path: "/admin/catalog", label: "Catalog", icon: <Tags size={18} />, exact: true },
+    { path: "/admin/customers", label: "Customers", icon: <Users size={18} />, exact: true },
   ];
 
-  // Mobile bottom bar – most used admin pages
+  // Mobile bottom bar – Dashboard, Orders (center), Customers
   const bottomBarItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/orders", label: "Orders", icon: Package },
-    { path: "/admin/create-order", label: "Create", icon: PackagePlus },
+    { path: "/admin/customers", label: "Customers", icon: Users },
   ];
 
   return (
@@ -124,32 +124,29 @@ const AdminLayout = () => {
         </div>
 
         <nav className="p-4 space-y-2" role="navigation" aria-label="Admin Navigation">
-          {adminNavItems.map(({ path, label, icon }) => (
-            <Link
-              key={path}
-              to={path}
-              onClick={() => setIsSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-300 ${
-                activePath === path
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700/50"
-              }`}
-            >
-              {icon}
-              <span>{label}</span>
-            </Link>
-          ))}
+          {adminNavItems.map(({ path, label, icon, exact }) => {
+            const isActive = exact ? activePath === path : activePath === path || activePath.startsWith(path + "/");
+            return (
+              <Link
+                key={path}
+                to={path}
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-300 ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700/50"
+                }`}
+              >
+                {icon}
+                <span>{label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="mx-4 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-slate-600" />
 
         <div className="p-4 space-y-2">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition"
-          >
-            ← Back to Site
-          </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold shadow-lg hover:shadow-xl transition duration-300"
@@ -190,6 +187,4 @@ const AdminLayout = () => {
       </nav>
     </div>
   );
-};
-
-export default AdminLayout;
+}

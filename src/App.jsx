@@ -48,6 +48,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="create-order" element={<AdminPlaceOrderPage />} />
+          <Route path="create-order/:orderId" element={<AdminPlaceOrderPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />
         </Route>

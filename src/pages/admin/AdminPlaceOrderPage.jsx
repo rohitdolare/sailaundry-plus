@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Calendar,
   Clock,
@@ -11,33 +12,40 @@ import {
   ShoppingCart,
   ArrowRight,
   User,
-  Search,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   getAllUsers,
   getUserProfile,
   addOrder,
+  updateOrder,
+  getOrderById,
   getCatalog,
+  createWalkinUser,
 } from "../../services/firestore";
 
-const CUSTOMER_TYPE = { EXISTING: "existing", WALKIN: "walkin" };
+const DEBOUNCE_MS = 350;
 
 const AdminPlaceOrderPage = () => {
-  const [customerType, setCustomerType] = useState(CUSTOMER_TYPE.WALKIN);
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const isEditMode = !!orderId;
+
   const [users, setUsers] = useState([]);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [customerListOpen, setCustomerListOpen] = useState(false);
+  const customerListRef = useRef(null);
+  const isPopulatingFromOrderRef = useRef(false);
+
+  // Selected customer (from search) or new: name/mobile/address always in form
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocationIndex, setSelectedLocationIndex] = useState(0);
-  const [customerSearch, setCustomerSearch] = useState("");
-  const [customerListOpen, setCustomerListOpen] = useState(false);
-  const customerListRef = useRef(null);
-
-  // Walk-in fields
-  const [walkinName, setWalkinName] = useState("");
-  const [walkinMobile, setWalkinMobile] = useState("");
-  const [walkinAddress, setWalkinAddress] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerMobile, setCustomerMobile] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
 
   const [formData, setFormData] = useState({
     pickupDate: "",
@@ -50,6 +58,8 @@ const AdminPlaceOrderPage = () => {
     { section: "", item: "", service: "", quantity: 1, price: 0 },
   ]);
   const [loading, setLoading] = useState(false);
+  const [loadingOrder, setLoadingOrder] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -71,24 +81,107 @@ const AdminPlaceOrderPage = () => {
   }, []);
 
   useEffect(() => {
-    if (customerType !== CUSTOMER_TYPE.EXISTING || !selectedUserId) {
+    if (!selectedUserId) {
       setSelectedUserProfile(null);
       setLocations([]);
       return;
     }
+    if (isPopulatingFromOrderRef.current) return;
     const load = async () => {
       try {
         const profile = await getUserProfile(selectedUserId);
         setSelectedUserProfile(profile);
-        setLocations(profile?.locations || []);
+        const locs = profile?.locations || [];
+        setLocations(locs);
         setSelectedLocationIndex(0);
+        // Prefill address for display; if they have no locations we use customerAddress
+        const firstAddr = locs[0]?.address || "";
+        setCustomerAddress((prev) => (prev || firstAddr));
       } catch (err) {
         console.error(err);
         toast.error("Failed to load customer profile.");
       }
     };
     load();
-  }, [customerType, selectedUserId]);
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (!orderId || !catalog.length) return;
+    isPopulatingFromOrderRef.current = true;
+    const load = async () => {
+      setLoadingOrder(true);
+      try {
+        const order = await getOrderById(orderId);
+        if (!order) {
+          toast.error("Order not found.");
+          navigate("/admin/orders");
+          return;
+        }
+        const isWalkin = order.pickupLocation?.label === "Walk-in";
+        setFormData({
+          pickupDate: order.pickupDate || "",
+          pickupTime: order.pickupTime || "",
+          instructions: order.instructions || "",
+        });
+        setItems(
+          order.items?.length
+            ? order.items.map((i) => ({
+                section: i.section || "",
+                item: i.item || "",
+                service: i.service || "",
+                quantity: i.quantity || 1,
+                price: i.price || 0,
+              }))
+            : [{ section: "", item: "", service: "", quantity: 1, price: 0 }]
+        );
+        setCustomerName(order.userName || "");
+        setCustomerMobile(order.userMobile || "");
+        setCustomerAddress(order.pickupLocation?.address || "");
+        if (isWalkin) {
+          setSelectedUserId(order.uid || "");
+          setSelectedUserProfile(null);
+          setLocations([]);
+        } else {
+          setSelectedUserId(order.uid || "");
+          const profile = await getUserProfile(order.uid);
+          const locs = profile?.locations || [];
+          setSelectedUserProfile(profile);
+          setLocations(locs);
+          const matchIdx = locs.findIndex(
+            (l) =>
+              (l.address || "") === (order.pickupLocation?.address || "") &&
+              (l.label || "") === (order.pickupLocation?.label || "")
+          );
+          setSelectedLocationIndex(matchIdx >= 0 ? matchIdx : 0);
+        }
+        setEditingOrder(order);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load order.");
+        navigate("/admin/orders");
+      }
+      setLoadingOrder(false);
+      isPopulatingFromOrderRef.current = false;
+    };
+    load();
+  }, [orderId, catalog.length, navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (customerListRef.current && !customerListRef.current.contains(e.target)) {
+        setCustomerListOpen(false);
+      }
+    };
+    if (customerListOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [customerListOpen]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(customerSearch), DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [customerSearch]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -127,31 +220,16 @@ const AdminPlaceOrderPage = () => {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const getOrderPayload = () => {
+  const getOrderPayload = (uid) => {
     const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    if (customerType === CUSTOMER_TYPE.WALKIN) {
-      const uid = `walkin-${Date.now()}`;
-      return {
-        uid,
-        userName: walkinName.trim(),
-        userMobile: walkinMobile.trim(),
-        pickupLocation: { label: "Walk-in", address: (walkinAddress || "").trim() },
-        pickupDate: formData.pickupDate,
-        pickupTime: formData.pickupTime,
-        instructions: formData.instructions,
-        status: "Pending",
-        createdAt: new Date(),
-        items,
-        totalAmount,
-      };
-    }
-    const selectedUser = users.find((u) => u.uid === selectedUserId);
-    if (!selectedUser || !locations.length) return null;
-    const pickupLocation = locations[selectedLocationIndex];
+    const hasSavedLocation = selectedUserId && locations.length > 0;
+    const pickupLocation = hasSavedLocation
+      ? locations[selectedLocationIndex]
+      : { label: "Walk-in", address: (customerAddress || "").trim() };
     return {
-      uid: selectedUserId,
-      userName: selectedUser.name,
-      userMobile: selectedUser.mobile,
+      uid,
+      userName: (customerName || selectedUserProfile?.name || "").trim(),
+      userMobile: (customerMobile || selectedUserProfile?.mobile || "").trim(),
       pickupLocation,
       pickupDate: formData.pickupDate,
       pickupTime: formData.pickupTime,
@@ -159,7 +237,7 @@ const AdminPlaceOrderPage = () => {
       status: "Pending",
       createdAt: new Date(),
       items,
-      totalAmount: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      totalAmount,
     };
   };
 
@@ -171,42 +249,67 @@ const AdminPlaceOrderPage = () => {
       return;
     }
 
-    if (customerType === CUSTOMER_TYPE.EXISTING) {
-      if (!selectedUserId) {
-        toast.error("Please select a customer.");
-        return;
-      }
-      if (!locations.length) {
-        toast.error("Selected customer has no saved locations. Use Walk-in and enter address.");
-        return;
-      }
-    } else {
-      if (!walkinName.trim() || !walkinMobile.trim()) {
-        toast.error("Please enter walk-in customer name and mobile.");
-        return;
-      }
-    }
-
-    const orderData = getOrderPayload();
-    if (!orderData) {
-      toast.error("Invalid order data.");
+    const name = customerName.trim();
+    const mobile = customerMobile.trim();
+    if (!name || !mobile) {
+      toast.error("Please enter customer name and mobile.");
       return;
     }
 
     setLoading(true);
+    let uid = selectedUserId;
+    if (!uid) {
+      const existingByMobile = users.find((u) => (u.mobile || "").replace(/\s/g, "") === mobile.replace(/\s/g, ""));
+      if (existingByMobile) {
+        uid = existingByMobile.uid;
+      } else {
+        try {
+          uid = await createWalkinUser({
+            name,
+            mobile,
+            address: customerAddress.trim() || undefined,
+          });
+          setUsers((prev) => [
+            ...prev,
+            {
+              uid,
+              name,
+              mobile,
+              role: "customer",
+              isWalkIn: true,
+              locations: customerAddress.trim() ? [{ label: "Default", address: customerAddress.trim() }] : [],
+            },
+          ]);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to create customer.");
+          setLoading(false);
+          return;
+        }
+      }
+    }
+
+    const orderData = getOrderPayload(uid);
     try {
-      await addOrder(orderData);
-      toast.success("Order created successfully!");
-      setFormData({ pickupDate: "", pickupTime: "", instructions: "" });
-      setItems([{ section: "", item: "", service: "", quantity: 1, price: 0 }]);
-      if (customerType === CUSTOMER_TYPE.WALKIN) {
-        setWalkinName("");
-        setWalkinMobile("");
-        setWalkinAddress("");
+      if (isEditMode) {
+        const payload = { ...orderData, status: editingOrder?.status ?? orderData.status };
+        await updateOrder(orderId, payload);
+        toast.success("Order updated successfully!");
+        navigate("/admin/orders");
+      } else {
+        await addOrder(orderData);
+        toast.success("Order created successfully!");
+        setFormData({ pickupDate: "", pickupTime: "", instructions: "" });
+        setItems([{ section: "", item: "", service: "", quantity: 1, price: 0 }]);
+        setCustomerName("");
+        setCustomerMobile("");
+        setCustomerAddress("");
+        setCustomerSearch("");
+        setSelectedUserId("");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create order.");
+      toast.error(isEditMode ? "Failed to update order." : "Failed to create order.");
     }
     setLoading(false);
   };
@@ -219,163 +322,162 @@ const AdminPlaceOrderPage = () => {
 
       <div className="relative px-4 py-8 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Create Order (Admin)
+          {isEditMode ? "Edit Order" : "Create Order (Admin)"}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Create an order for an existing customer or a walk-in customer
+          {isEditMode ? "Update order details" : "Search for a customer or enter details for a new one"}
         </p>
 
         <form
           onSubmit={handleSubmit}
           className="space-y-6 rounded-3xl bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 p-8 shadow-xl"
         >
-          {/* Customer type */}
-          <div className="space-y-3">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <User size={18} className="text-indigo-600 dark:text-indigo-400" />
-              Customer type
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="customerType"
-                  checked={customerType === CUSTOMER_TYPE.WALKIN}
-                  onChange={() => setCustomerType(CUSTOMER_TYPE.WALKIN)}
-                  className="accent-indigo-600"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Walk-in</span>
+          {/* Single customer flow: search → select or enter new */}
+          <div className="space-y-4">
+            <div className="relative space-y-3" ref={customerListRef}>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <User size={18} className="text-indigo-600 dark:text-indigo-400" />
+                Customer
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <div className="relative">
                 <input
-                  type="radio"
-                  name="customerType"
-                  checked={customerType === CUSTOMER_TYPE.EXISTING}
-                  onChange={() => {
-                    setCustomerType(CUSTOMER_TYPE.EXISTING);
-                    setCustomerSearch("");
+                  type="text"
+                  value={customerSearch}
+                  onChange={(e) => {
+                    setCustomerSearch(e.target.value);
+                    setCustomerListOpen(true);
+                    if (selectedUserId) {
+                      setSelectedUserId("");
+                      setCustomerName("");
+                      setCustomerMobile("");
+                      setCustomerAddress("");
+                    }
                   }}
-                  className="accent-indigo-600"
+                  onFocus={() => setCustomerListOpen(true)}
+                  onClick={() => setCustomerListOpen(true)}
+                  placeholder="Search by name or mobile..."
+                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 />
-                <span className="text-gray-700 dark:text-gray-300">Existing customer</span>
-              </label>
+              </div>
+              {customerListOpen && (() => {
+                const q = (debouncedSearch || "").trim().toLowerCase();
+                const filtered =
+                  q.length < 2
+                    ? []
+                    : users.filter(
+                        (u) =>
+                          (u.name || "").toLowerCase().includes(q) ||
+                          (u.mobile || "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
+                      );
+                return (
+                  <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-lg">
+                    {filtered.length === 0 ? (
+                      <p className="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        {q.length < 2 ? "Type at least 2 characters to search" : "No customer found — enter details below as new customer"}
+                      </p>
+                    ) : (
+                      filtered.map((u) => (
+                        <button
+                          key={u.uid}
+                          type="button"
+                          onClick={() => {
+                            setSelectedUserId(u.uid);
+                            setCustomerName(u.name || "");
+                            setCustomerMobile(u.mobile || "");
+                            setCustomerAddress(u.locations?.[0]?.address || "");
+                            setCustomerListOpen(false);
+                            setCustomerSearch("");
+                          }}
+                          className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-slate-600 last:border-0 text-sm transition ${
+                            selectedUserId === u.uid
+                              ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                          }`}
+                        >
+                          {u.name || "—"} · {u.mobile || "—"}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                );
+              })()}
             </div>
-          </div>
 
-          {customerType === CUSTOMER_TYPE.EXISTING ? (
-            <>
-              <div className="relative space-y-3" ref={customerListRef}>
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Select customer
+            {selectedUserId && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Selected: <span className="font-medium text-gray-900 dark:text-white">{customerName || "—"} · {customerMobile || "—"}</span>
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedUserId("");
+                    setCustomerSearch("");
+                    setCustomerName("");
+                    setCustomerMobile("");
+                    setCustomerAddress("");
+                  }}
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Change customer
+                </button>
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Customer name"
+                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile</label>
+                <input
+                  type="tel"
+                  value={customerMobile}
+                  onChange={(e) => setCustomerMobile(e.target.value)}
+                  placeholder="10-digit mobile"
+                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                />
+              </div>
+            </div>
+
+            {locations.length > 0 ? (
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <MapPin size={18} /> Pickup location
                 </label>
-                <div className="relative">
-                  <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={customerSearch}
-                    onChange={(e) => setCustomerSearch(e.target.value)}
-                    onFocus={() => setCustomerListOpen(true)}
-                    onClick={() => setCustomerListOpen(true)}
-                    placeholder="Search by name or mobile..."
-                    className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 pl-10 pr-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
-                  />
-                </div>
-                {customerListOpen && (() => {
-                  const q = (customerSearch || "").trim().toLowerCase();
-                  const filtered =
-                    !q
-                      ? users
-                      : users.filter(
-                          (u) =>
-                            (u.name || "").toLowerCase().includes(q) ||
-                            (u.mobile || "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
-                        );
-                  return (
-                    <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-lg">
-                      {filtered.length === 0 ? (
-                        <p className="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                          {users.length === 0 ? "No customers yet." : "No customer matches search."}
-                        </p>
-                      ) : (
-                        filtered.map((u) => (
-                          <button
-                            key={u.uid}
-                            type="button"
-                            onClick={() => {
-                              setSelectedUserId(u.uid);
-                              setCustomerListOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-slate-600 last:border-0 text-sm transition ${
-                              selectedUserId === u.uid
-                                ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium"
-                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
-                            }`}
-                          >
-                            {u.name || "—"} · {u.mobile || "—"}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  );
-                })()}
+                <select
+                  value={selectedLocationIndex}
+                  onChange={(e) => setSelectedLocationIndex(parseInt(e.target.value))}
+                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+                >
+                  {locations.map((loc, i) => (
+                    <option key={i} value={i}>
+                      {loc.label} – {loc.address}
+                    </option>
+                  ))}
+                </select>
               </div>
-              {locations.length > 0 && (
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <MapPin size={18} /> Pickup location
-                  </label>
-                  <select
-                    value={selectedLocationIndex}
-                    onChange={(e) => setSelectedLocationIndex(parseInt(e.target.value))}
-                    className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
-                  >
-                    {locations.map((loc, i) => (
-                      <option key={i} value={i}>
-                        {loc.label} – {loc.address}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
-                  <input
-                    type="text"
-                    value={walkinName}
-                    onChange={(e) => setWalkinName(e.target.value)}
-                    placeholder="Customer name"
-                    className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile</label>
-                  <input
-                    type="tel"
-                    value={walkinMobile}
-                    onChange={(e) => setWalkinMobile(e.target.value)}
-                    placeholder="10-digit mobile"
-                    className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
-                  />
-                </div>
-              </div>
+            ) : (
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Address <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
                 </label>
                 <input
                   type="text"
-                  value={walkinAddress}
-                  onChange={(e) => setWalkinAddress(e.target.value)}
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
                   placeholder="Pickup address (optional)"
                   className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
                 />
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Date & time */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,11 +614,13 @@ const AdminPlaceOrderPage = () => {
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || loadingOrder}
             className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Shirt size={20} />
-            <span>{loading ? "Creating..." : "Create order"}</span>
+            <span>
+              {loadingOrder ? "Loading..." : loading ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update order" : "Create order"}
+            </span>
             <ArrowRight size={20} />
           </button>
         </form>
