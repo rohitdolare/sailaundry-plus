@@ -1,5 +1,14 @@
 // src/services/firebase/userService.js
-import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 // 🔹 Fetch user profile data
@@ -61,4 +70,26 @@ export const getAllUsers = async () => {
 export const updateUserVerified = async (uid, verified) => {
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, { verified: !!verified });
+};
+
+// 🔹 Admin: delete customer (removes user document; does not delete Firebase Auth user if any)
+export const deleteUserProfile = async (uid) => {
+  const docRef = doc(db, "users", uid);
+  await deleteDoc(docRef);
+};
+
+// 🔹 Create walk-in customer (no Auth - name + mobile only)
+export const createWalkinUser = async ({ name, mobile, address }) => {
+  const userData = {
+    name: (name || "").trim(),
+    mobile: (mobile || "").trim(),
+    role: "customer",
+    isWalkIn: true,
+    locations: address?.trim()
+      ? [{ label: "Default", address: address.trim() }]
+      : [],
+    createdAt: serverTimestamp(),
+  };
+  const docRef = await addDoc(collection(db, "users"), userData);
+  return docRef.id;
 };

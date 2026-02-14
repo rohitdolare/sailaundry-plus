@@ -3,7 +3,9 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   updateDoc,
+  deleteDoc,
   runTransaction,
   serverTimestamp,
   query,
@@ -88,8 +90,29 @@ export const subscribeToAllOrders = (callback) => {
   return unsubscribe;
 };
 
+// 🔹 Get order by ID
+export const getOrderById = async (orderId) => {
+  const orderRef = doc(db, "orders", orderId);
+  const snap = await getDoc(orderRef);
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() };
+};
+
+// 🔹 Update order (admin only – full edit)
+export const updateOrder = async (orderId, orderData) => {
+  const orderRef = doc(db, "orders", orderId);
+  const { orderNumber, createdAt, ...rest } = orderData;
+  await updateDoc(orderRef, rest);
+};
+
 // 🔹 Update order status (admin only)
 export const updateOrderStatus = async (orderId, status) => {
   const orderRef = doc(db, "orders", orderId);
   await updateDoc(orderRef, { status });
+};
+
+// 🔹 Delete order (admin only)
+export const deleteOrder = async (orderId) => {
+  const orderRef = doc(db, "orders", orderId);
+  await deleteDoc(orderRef);
 };

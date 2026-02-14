@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   X,
   PackageCheck,
@@ -9,9 +11,21 @@ import {
   User,
   Phone,
   Shirt,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
-const OrderDetailsModal = ({ order, onClose }) => {
+const OrderDetailsModal = ({ order, onClose, onEdit, onDelete }) => {
+  // Lock body scroll when modal is open so background doesn't scroll
+  useEffect(() => {
+    if (!order) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [order]);
+
   if (!order) return null;
 
   const getStatusIcon = (status) => {
@@ -37,7 +51,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
       {/* Modal */}
       <div
         className="relative bg-gradient-to-br from-white via-blue-50 to-purple-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
-          rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg p-6 max-h-screen overflow-y-auto
+          rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg p-6 max-h-screen overflow-y-auto overscroll-contain
           animate-slide-up md:animate-fade-in mt-auto md:mt-0"
       >
         {/* Close */}
@@ -123,6 +137,28 @@ const OrderDetailsModal = ({ order, onClose }) => {
           <div className="mt-4">
             <h4 className="font-semibold text-gray-800 dark:text-white mb-1">Instructions:</h4>
             <p className="italic text-sm text-gray-600 dark:text-gray-400">“{order.instructions}”</p>
+          </div>
+        )}
+
+        {/* Edit / Delete (admin only) */}
+        {onEdit && order.id && (
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-600 flex flex-wrap gap-2">
+            <Link
+              to={`/admin/create-order/${order.id}`}
+              onClick={onClose}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
+            >
+              <Pencil size={18} /> Edit order
+            </Link>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(order)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition"
+              >
+                <Trash2 size={18} /> Delete order
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -1,14 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import {
   Package,
   Clock,
+  Users,
   TrendingUp,
-  IndianRupee,
+  TrendingDown,
   Calendar,
-  CalendarDays,
 } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
+import { getAllUsers } from "../../services/firestore/userService";
 
 const getOrderDate = (order) => {
   const t = order?.createdAt;
@@ -38,6 +38,7 @@ const PERIOD = { TODAY: "today", DAY: "day", THIS_MONTH: "this_month", MONTH: "m
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
+  const [customerCount, setCustomerCount] = useState(null);
   const [period, setPeriod] = useState(PERIOD.TODAY);
   const [chosenDate, setChosenDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [chosenMonth, setChosenMonth] = useState(() => {
@@ -48,6 +49,13 @@ const AdminDashboard = () => {
   useEffect(() => {
     const unsubscribe = subscribeToAllOrders(setOrders);
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    getAllUsers().then((users) => {
+      const customersOnly = Array.isArray(users) ? users.filter((u) => u.role !== "admin") : [];
+      setCustomerCount(customersOnly.length);
+    });
   }, []);
 
   const targetDay = useMemo(() => {
@@ -68,7 +76,7 @@ const AdminDashboard = () => {
     return null;
   }, [period, chosenMonth]);
 
-  const { revenue, total, pending, periodLabel } = useMemo(() => {
+  const { revenue, total, pending, periodLabel, prevRevenue, prevTotal } = useMemo(() => {
     if (targetDay) {
       const dayOrders = orders.filter((o) => isSameDay(getOrderDate(o), targetDay));
       const revenue = dayOrders
@@ -76,11 +84,18 @@ const AdminDashboard = () => {
         .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       const total = dayOrders.length;
       const pending = dayOrders.filter((o) => o.status !== "Completed").length;
+      const prevDay = new Date(targetDay);
+      prevDay.setDate(prevDay.getDate() - 1);
+      const prevDayOrders = orders.filter((o) => isSameDay(getOrderDate(o), prevDay));
+      const prevRevenue = prevDayOrders
+        .filter((o) => o.status === "Completed")
+        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+      const prevTotal = prevDayOrders.length;
       const label =
         period === PERIOD.TODAY
           ? "Today"
           : targetDay.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-      return { revenue, total, pending, periodLabel: label };
+      return { revenue, total, pending, periodLabel: label, prevRevenue, prevTotal };
     }
     if (targetMonthStart) {
       const monthOrders = orders.filter((o) => isSameMonth(getOrderDate(o), targetMonthStart));
@@ -89,13 +104,20 @@ const AdminDashboard = () => {
         .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       const total = monthOrders.length;
       const pending = monthOrders.filter((o) => o.status !== "Completed").length;
+      const prevMonthStart = new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth() - 1, 1);
+      const prevMonthOrders = orders.filter((o) => isSameMonth(getOrderDate(o), prevMonthStart));
+      const prevRevenue = prevMonthOrders
+        .filter((o) => o.status === "Completed")
+        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+      const prevTotal = prevMonthOrders.length;
       const label = `${MONTH_NAMES[targetMonthStart.getMonth()]} ${targetMonthStart.getFullYear()}`;
-      return { revenue, total, pending, periodLabel: label };
+      return { revenue, total, pending, periodLabel: label, prevRevenue, prevTotal };
     }
-    return { revenue: 0, total: 0, pending: 0, periodLabel: "—" };
+    return { revenue: 0, total: 0, pending: 0, periodLabel: "—", prevRevenue: 0, prevTotal: 0 };
   }, [orders, targetDay, targetMonthStart, period]);
 
-  const last6Months = useMemo(() => {
+  const last6MonthsData = useMemo(() => {
+    const now = new Date();
     const byMonth = {};
     orders.forEach((o) => {
       const d = getOrderDate(o);
@@ -105,13 +127,18 @@ const AdminDashboard = () => {
       byMonth[key].orders += 1;
       if (o.status === "Completed") byMonth[key].revenue += o.totalAmount || 0;
     });
-    return Object.entries(byMonth)
-      .map(([key, data]) => {
-        const [y, m] = key.split("-").map(Number);
-        return { key, label: `${MONTH_NAMES[m - 1]} ${y}`, ...data };
-      })
-      .sort((a, b) => b.key.localeCompare(a.key))
-      .slice(0, 6);
+    const result = [];
+    for (let i = 0; i <= 5; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = getMonthKey(d);
+      const data = byMonth[key] || { revenue: 0, orders: 0 };
+      result.push({
+        key,
+        label: MONTH_NAMES[d.getMonth()],
+        ...data,
+      });
+    }
+    return result;
   }, [orders]);
 
   const years = useMemo(() => {
@@ -119,154 +146,180 @@ const AdminDashboard = () => {
     return Array.from({ length: 5 }, (_, i) => y - i);
   }, []);
 
+  const revenueTrend = prevRevenue != null && prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : null;
+  const ordersTrend = prevTotal != null && prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null;
+  const sixMonthTotal = useMemo(
+    () => last6MonthsData.reduce((s, r) => s + r.revenue, 0),
+    [last6MonthsData]
+  );
+
   return (
-    <div className="min-h-screen w-full bg-[#e5e7eb] dark:bg-slate-900 transition-colors">
-      <div className="px-3 py-4 max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-bold text-[#111827] dark:text-white">
-            Dashboard
-          </h1>
-          <Link
-            to="/admin/orders"
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#2563eb] dark:text-indigo-400"
-          >
-            <TrendingUp size={14} /> Orders
-          </Link>
-        </div>
+    <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] transition-colors overflow-auto flex flex-col">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex-1 flex flex-col gap-4">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight shrink-0">
+          Dashboard
+        </h1>
 
-        {/* Period pills */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {[
-            { key: PERIOD.TODAY, label: "Today", icon: CalendarDays },
-            { key: PERIOD.DAY, label: "Day", icon: Calendar },
-            { key: PERIOD.THIS_MONTH, label: "This month", icon: null },
-            { key: PERIOD.MONTH, label: "Month", icon: null },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setPeriod(key)}
-              className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border-2 transition ${
-                period === key
-                  ? "bg-[#eff6ff] dark:bg-indigo-900/40 border-[#2563eb] dark:border-indigo-500 text-[#1d4ed8] dark:text-indigo-200"
-                  : "bg-white dark:bg-slate-800 border-[#9ca3af] dark:border-slate-600 text-[#374151] dark:text-slate-200 hover:border-[#6b7280] dark:hover:border-slate-500"
-              }`}
-            >
-              {Icon && <Icon size={12} />}
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {period === PERIOD.DAY && (
-          <div className="mb-4">
-            <input
-              type="date"
-              value={chosenDate}
-              onChange={(e) => setChosenDate(e.target.value)}
-              className="w-full rounded-lg border-2 border-[#9ca3af] bg-white dark:bg-slate-800 dark:border-slate-600 px-3 py-2 text-sm text-[#111827] dark:text-white"
-            />
-          </div>
-        )}
-
-        {period === PERIOD.MONTH && (
-          <div className="flex gap-2 mb-4">
-            <select
-              value={chosenMonth ? chosenMonth.slice(5, 7) : "01"}
-              onChange={(e) => setChosenMonth(`${chosenMonth.slice(0, 4)}-${e.target.value.padStart(2, "0")}`)}
-              className="flex-1 rounded-lg border-2 border-[#9ca3af] bg-white dark:bg-slate-800 dark:border-slate-600 px-3 py-2 text-sm text-[#111827] dark:text-white"
-            >
-              {MONTH_NAMES.map((m, i) => (
-                <option key={m} value={String(i + 1).padStart(2, "0")}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
-              value={chosenMonth ? chosenMonth.slice(0, 4) : new Date().getFullYear()}
-              onChange={(e) => setChosenMonth(`${e.target.value}-${(chosenMonth || "").slice(5, 7) || "01"}`)}
-              className="flex-1 rounded-lg border-2 border-[#9ca3af] bg-white dark:bg-slate-800 dark:border-slate-600 px-3 py-2 text-sm text-[#111827] dark:text-white"
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <p className="text-xs font-medium text-[#4b5563] dark:text-slate-400 mb-3">
-          {periodLabel}
-        </p>
-
-        {/* Stat cards – white with colored left border + dark text (high contrast light mode) */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
-          <div
-            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-[#d1d5db] dark:border-slate-600 border-l-4 border-l-[#059669] dark:border-l-emerald-500 p-4 shadow-md"
-            title="Revenue (completed)"
-          >
-            <IndianRupee size={20} className="text-[#059669] dark:text-emerald-400 mb-1" />
-            <p className="text-xl sm:text-2xl font-bold text-[#111827] dark:text-white truncate">
-              ₹{revenue}
+        {/* Period + primary metric */}
+        <section className="shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 tracking-wide">
+              Overview
             </p>
-          </div>
-          <div
-            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-[#d1d5db] dark:border-slate-600 border-l-4 border-l-[#2563eb] dark:border-l-indigo-400 p-4 shadow-md"
-            title="Orders"
-          >
-            <Package size={20} className="text-[#2563eb] dark:text-indigo-400 mb-1" />
-            <p className="text-xl sm:text-2xl font-bold text-[#111827] dark:text-white">
-              {total}
-            </p>
-          </div>
-          <div
-            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-[#d1d5db] dark:border-slate-600 border-l-4 border-l-[#d97706] dark:border-l-amber-400 p-4 shadow-md"
-            title="Pending"
-          >
-            <Clock size={20} className="text-[#d97706] dark:text-amber-400 mb-1" />
-            <p className="text-xl sm:text-2xl font-bold text-[#111827] dark:text-white">
-              {pending}
-            </p>
-          </div>
-        </div>
-
-        {/* Last 6 months */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl border-2 border-[#d1d5db] dark:border-slate-600 shadow-md overflow-hidden">
-          <div className="px-3 py-2.5 border-b-2 border-[#e5e7eb] dark:border-slate-700 flex items-center gap-2 bg-[#f3f4f6] dark:bg-slate-700/50">
-            <Calendar size={14} className="text-[#2563eb] dark:text-indigo-400" />
-            <span className="text-xs font-semibold text-[#111827] dark:text-white">
-              Last 6 months
-            </span>
-          </div>
-          <div className="divide-y divide-[#e5e7eb] dark:divide-slate-700">
-            {last6Months.length === 0 ? (
-              <p className="px-3 py-4 text-xs text-[#6b7280] dark:text-slate-400 text-center">
-                No data
-              </p>
-            ) : (
-              last6Months.map((row) => (
-                <div
-                  key={row.key}
-                  className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f9fafb] dark:hover:bg-slate-700/30"
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { key: PERIOD.TODAY, label: "Today" },
+                { key: PERIOD.DAY, label: "Date" },
+                { key: PERIOD.THIS_MONTH, label: "This month" },
+                { key: PERIOD.MONTH, label: "Custom" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setPeriod(key)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    period === key
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-600/50 shadow-sm"
+                      : "bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-600/80"
+                  }`}
                 >
-                  <span className="text-sm font-medium text-[#111827] dark:text-white">
-                    {row.label}
+                  {label}
+                </button>
+              ))}
+              {(period === PERIOD.DAY || period === PERIOD.MONTH) && (
+                period === PERIOD.DAY ? (
+                  <input
+                    type="date"
+                    value={chosenDate}
+                    onChange={(e) => setChosenDate(e.target.value)}
+                    className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200"
+                  />
+                ) : (
+                  <span className="flex gap-1.5">
+                    <select
+                      value={chosenMonth ? chosenMonth.slice(5, 7) : "01"}
+                      onChange={(e) => setChosenMonth(`${chosenMonth.slice(0, 4)}-${e.target.value.padStart(2, "0")}`)}
+                      className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm"
+                    >
+                      {MONTH_NAMES.map((m, i) => (
+                        <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={chosenMonth ? chosenMonth.slice(0, 4) : new Date().getFullYear()}
+                      onChange={(e) => setChosenMonth(`${e.target.value}-${(chosenMonth || "").slice(5, 7) || "01"}`)}
+                      className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm"
+                    >
+                      {years.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
                   </span>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span className="font-semibold text-[#111827] dark:text-white">
-                      ₹{row.revenue}
-                    </span>
-                    <span className="text-[#6b7280] dark:text-slate-400">
-                      {row.orders} orders
-                    </span>
-                  </div>
-                </div>
-              ))
+                )
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+            <div className="px-5 sm:px-6 py-4 sm:py-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">
+                Revenue · {periodLabel}
+              </p>
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="text-3xl sm:text-4xl font-bold tabular-nums text-slate-900 dark:text-white">
+                  ₹{revenue.toLocaleString("en-IN")}
+                </span>
+                {revenueTrend != null && (
+                  <span
+                    className={`inline-flex items-center gap-1 text-sm font-medium ${
+                      revenueTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {revenueTrend >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                    {revenueTrend >= 0 ? "+" : ""}{revenueTrend.toFixed(1)}% vs previous
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Supporting stats */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+          <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-indigo-400/60 dark:border-t-indigo-500/50">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Orders
+              </span>
+              <Package size={18} className="text-indigo-400/80 dark:text-indigo-400/70" />
+            </div>
+            <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{total}</p>
+            {ordersTrend != null && (
+              <p className={`mt-0.5 text-xs font-medium ${ordersTrend >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {ordersTrend >= 0 ? "+" : ""}{ordersTrend.toFixed(0)}%
+              </p>
             )}
           </div>
-        </div>
+          <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-amber-400/60 dark:border-t-amber-500/50">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Pending
+              </span>
+              <Clock size={18} className="text-amber-500/80" />
+            </div>
+            <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{pending}</p>
+          </div>
+          {customerCount != null && (
+            <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-emerald-400/60 dark:border-t-emerald-500/50">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Customers
+                </span>
+                <Users size={18} className="text-emerald-500/80 dark:text-emerald-400/70" />
+              </div>
+              <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{customerCount}</p>
+            </div>
+          )}
+          {/* Spacer when 3 cards so layout doesn't break */}
+          {customerCount == null && <div className="hidden lg:block" />}
+        </section>
+
+        {/* Last 6 months – table */}
+        <section className="rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden min-h-0 flex flex-col flex-1">
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <Calendar size={18} className="text-indigo-500/80 dark:text-indigo-400/70" />
+            <h2 className="text-base font-semibold text-slate-800 dark:text-white">
+              Last 6 months
+            </h2>
+          </div>
+          <div className="overflow-x-auto min-h-0 flex-1">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-700/80">
+                  <th className="text-left py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Month</th>
+                  <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Revenue</th>
+                  <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Orders</th>
+                </tr>
+              </thead>
+              <tbody>
+                {last6MonthsData.map((row) => (
+                  <tr key={row.key} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
+                    <td className="py-2 px-5 font-medium text-slate-800 dark:text-slate-200">{row.label}</td>
+                    <td className="py-2 px-5 text-right tabular-nums text-slate-800 dark:text-slate-200">
+                      ₹{row.revenue.toLocaleString("en-IN")}
+                    </td>
+                    <td className="py-2 px-5 text-right tabular-nums text-slate-600 dark:text-slate-300">{row.orders}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-2 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/80 shrink-0">
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
+              Total · ₹{sixMonthTotal.toLocaleString("en-IN")}
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
