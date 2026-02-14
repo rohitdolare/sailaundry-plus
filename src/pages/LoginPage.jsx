@@ -4,8 +4,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import SaiLaundryLogo from "../components/SaiLaundryLogo";
-import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import loginIllustration from "../assets/login-illustration.png";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -89,61 +89,28 @@ const LoginPage = () => {
       <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
           
-          {/* 👈 Left: Branding & Benefits */}
-          <div className="text-center md:text-left space-y-8 animate-fade-in">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <Sparkles className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
-                <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                  Sai Laundry+
-                </h1>
-              </div>
-              <p className="text-xl text-gray-700 dark:text-gray-300 font-medium">
-                Smart Laundry, Smart Living
-              </p>
+          {/* 👈 Left: Illustration & minimal branding */}
+          <div className="text-center md:text-left space-y-6 animate-fade-in">
+            <div className="flex justify-center md:justify-start">
+              <img
+                src={loginIllustration}
+                alt="Laundry made easy"
+                className="w-full max-w-sm md:max-w-md object-contain drop-shadow-lg"
+              />
             </div>
-
-            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-              Experience hassle-free laundry service with real-time tracking, scheduled pickups, and professional care—all at your fingertips.
-            </p>
-
-            {/* ✨ Features List */}
-            <div className="space-y-4">
-              {[
-                { icon: "⚡", text: "Lightning-fast service" },
-                { icon: "🔐", text: "100% secure & trusted" },
-                { icon: "📍", text: "Doorstep pickup & delivery" },
-                { icon: "💰", text: "Affordable pricing" },
-              ].map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-4 transform transition hover:translate-x-2">
-                  <span className="text-2xl">{feature.icon}</span>
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">{feature.text}</span>
-                </div>
-              ))}
+            <div>
+              <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                Sai Laundry+
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Smart laundry, at your doorstep.</p>
             </div>
-
-            {/* 🎯 Stats */}
-            <div className="grid grid-cols-2 gap-6 pt-4">
-              <div className="bg-white/40 dark:bg-gray-800/40 backdrop-blur-sm rounded-xl p-4 border border-white/60 dark:border-gray-700/60">
-                <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">1K+</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Happy Customers</p>
-              </div>
-              <div className="bg-white/40 dark:bg-gray-800/40 backdrop-blur-sm rounded-xl p-4 border border-white/60 dark:border-gray-700/60">
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">24/7</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Support Available</p>
-              </div>
-            </div>
-
-            <SaiLaundryLogo />
           </div>
 
           {/* 👉 Right: Login Form Card */}
           <div className="w-full max-w-md mx-auto animate-slide-up">
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-white dark:border-gray-800 rounded-3xl shadow-2xl p-8 space-y-8">
-              {/* Header */}
-              <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
-                <p className="text-gray-600 dark:text-gray-400">Sign in to manage your laundry</p>
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
               </div>
 
               {/* Error Message */}
@@ -160,17 +127,14 @@ const LoginPage = () => {
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-500 dark:text-indigo-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-300 transition" />
-                    <input
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      required
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
-                    />
-                  </div>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                  />
                 </div>
 
                 {/* Password Input */}
@@ -179,14 +143,13 @@ const LoginPage = () => {
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-500 dark:text-indigo-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-300 transition" />
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
                       required
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-12 pr-12 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                      className="w-full px-4 pr-12 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                     />
                     <button
                       type="button"
