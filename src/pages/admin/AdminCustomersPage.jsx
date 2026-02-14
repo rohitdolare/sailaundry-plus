@@ -12,6 +12,7 @@ import { Users, CheckCircle, Loader2, Pencil, MapPin, Plus, Trash2, X, Clock, Ma
 const AdminCustomersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [updatingUid, setUpdatingUid] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", mobile: "", locations: [] });
@@ -159,6 +160,30 @@ const AdminCustomersPage = () => {
     setDeletingUid(null);
   };
 
+  // Filter customers by search (name, email, mobile, address)
+  const customerToSearchText = (u) => {
+    const parts = [
+      u.name || "",
+      u.email || "",
+      u.mobile || "",
+      ...(u.locations || []).flatMap((l) => [l.label || "", l.address || ""]),
+    ];
+    return parts.join(" ").toLowerCase();
+  };
+  const filteredUsers = !searchQuery.trim()
+    ? users
+    : users.filter((u) =>
+        customerToSearchText(u).includes(searchQuery.trim().toLowerCase())
+      );
+
+  // Avatar initials: first letter of first word + first letter of last word (e.g. "Rohit Dolare" → "RD")
+  const getInitials = (name) => {
+    const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "?";
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
@@ -170,13 +195,43 @@ const AdminCustomersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white pb-20 md:pb-0">
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Users size={24} className="text-indigo-500" />
-          <h1 className="text-xl font-bold">Customers</h1>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <Users size={24} className="text-indigo-500" />
+            <h1 className="text-xl font-bold">Customers</h1>
+          </div>
+          {users.length > 0 && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {searchQuery.trim()
+                ? `${filteredUsers.length} of ${users.length}`
+                : `${users.length} total`}
+            </p>
+          )}
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Only verified customers can log in. &quot;Awaiting verification&quot; means they signed up but cannot sign in until you verify them.
         </p>
+
+        <div className="relative mb-6">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, email, mobile, or address..."
+            className="w-full h-10 pl-3 pr-9 rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm placeholder-gray-500 dark:placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+            aria-label="Search customers"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-slate-600"
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         {users.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-300 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 p-12 text-center">
@@ -185,7 +240,12 @@ const AdminCustomersPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {users.map((u) => (
+            {searchQuery.trim() && filteredUsers.length === 0 && (
+              <p className="text-center text-gray-500 dark:text-gray-400 py-6">
+                No customers match &quot;{searchQuery.trim()}&quot;.
+              </p>
+            )}
+            {filteredUsers.map((u) => (
               <div
                 key={u.uid}
                 className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-slate-800 shadow-sm transition hover:shadow-md dark:shadow-none dark:hover:bg-slate-800/90 ${
@@ -200,12 +260,12 @@ const AdminCustomersPage = () => {
                     <div
                       role="img"
                       aria-label={`Avatar for ${u.name || "Customer"}`}
-                      className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white ring-2 ring-gray-300 dark:ring-slate-500"
+                      className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white ring-2 ring-gray-300 dark:ring-slate-500"
                       style={{
                         backgroundColor: u.verified === true ? "#15803d" : "#b45309",
                       }}
                     >
-                      {(u.name || "?").charAt(0).toUpperCase()}
+                      {getInitials(u.name)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
