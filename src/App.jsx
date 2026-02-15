@@ -18,6 +18,7 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminPlaceOrderPage from "./pages/admin/AdminPlaceOrderPage";
 import AdminCatalogPage from "./pages/admin/AdminCatalogPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
+import AdminProfilePage from "./pages/admin/AdminProfilePage";
 
 // Route Guards
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -51,6 +52,7 @@ function App() {
           <Route path="create-order/:orderId" element={<AdminPlaceOrderPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />
+          <Route path="profile" element={<AdminProfilePage />} />
         </Route>
 
         {/* 🔒 Protected Routes (customers) */}

@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
-import loginIllustration from "../assets/login-illustration.png";
+import loginIllustration from "../assets/login-illustration.jpg";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");

@@ -6,7 +6,7 @@ import { auth, db } from "../firebase";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowRight } from "lucide-react";
-import signupIllustration from "../assets/login-illustration.png";
+import signupIllustration from "../assets/login-illustration-2.jpg";
 
 const SignupPage = () => {
   const [fullName, setFullName] = useState("");

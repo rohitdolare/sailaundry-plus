@@ -9,6 +9,7 @@ import {
   Moon,
   Shield,
   Tags,
+  User,
   Users,
   Package,
   ShoppingCart,
@@ -63,13 +64,15 @@ export default function AdminLayout() {
     { path: "/admin/create-order", label: "Create Order", icon: <ShoppingCart size={18} />, exact: false },
     { path: "/admin/catalog", label: "Catalog", icon: <Tags size={18} />, exact: true },
     { path: "/admin/customers", label: "Customers", icon: <Users size={18} />, exact: true },
+    { path: "/admin/profile", label: "Profile", icon: <User size={18} />, exact: true },
   ];
 
-  // Mobile bottom bar – Dashboard, Orders (center), Customers
+  // Mobile bottom bar – Dashboard, Orders, Customers, Profile
   const bottomBarItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/orders", label: "Orders", icon: Package },
     { path: "/admin/customers", label: "Customers", icon: Users },
+    { path: "/admin/profile", label: "Profile", icon: User },
   ];
 
   return (

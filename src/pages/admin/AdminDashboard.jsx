@@ -3,9 +3,9 @@ import {
   Package,
   Clock,
   Users,
-  TrendingUp,
-  TrendingDown,
   Calendar,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
 import { getAllUsers } from "../../services/firestore/userService";
@@ -32,7 +32,11 @@ const isSameMonth = (d1, d2) =>
 const getMonthKey = (date) =>
   date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` : "";
 
+const getDayKey = (date) =>
+  date ? date.toISOString().slice(0, 10) : "";
+
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const PERIOD = { TODAY: "today", DAY: "day", THIS_MONTH: "this_month", MONTH: "month" };
 
@@ -45,6 +49,7 @@ const AdminDashboard = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
+  const [revenueRange, setRevenueRange] = useState("6months"); // "6months" | "6days"
 
   useEffect(() => {
     const unsubscribe = subscribeToAllOrders(setOrders);
@@ -141,6 +146,37 @@ const AdminDashboard = () => {
     return result;
   }, [orders]);
 
+  const last6DaysData = useMemo(() => {
+    const now = new Date();
+    const byDay = {};
+    orders.forEach((o) => {
+      const d = getOrderDate(o);
+      if (!d) return;
+      const key = getDayKey(d);
+      if (!byDay[key]) byDay[key] = { revenue: 0, orders: 0 };
+      byDay[key].orders += 1;
+      if (o.status === "Completed") byDay[key].revenue += o.totalAmount || 0;
+    });
+    const result = [];
+    for (let i = 0; i <= 5; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const key = getDayKey(d);
+      const data = byDay[key] || { revenue: 0, orders: 0 };
+      const dayName = DAY_NAMES[d.getDay()];
+      const dateStr = d.getDate();
+      const monthStr = MONTH_NAMES[d.getMonth()];
+      result.push({
+        key,
+        label: `${dayName} ${dateStr} ${monthStr}`,
+        shortLabel: `${dayName} ${dateStr}`,
+        ...data,
+      });
+    }
+    return result;
+  }, [orders]);
+
   const years = useMemo(() => {
     const y = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => y - i);
@@ -152,11 +188,15 @@ const AdminDashboard = () => {
     () => last6MonthsData.reduce((s, r) => s + r.revenue, 0),
     [last6MonthsData]
   );
+  const sixDayTotal = useMemo(
+    () => last6DaysData.reduce((s, r) => s + r.revenue, 0),
+    [last6DaysData]
+  );
 
   return (
     <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] transition-colors overflow-auto flex flex-col">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex-1 flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight shrink-0">
+      <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-4 lg:gap-6">
+        <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight shrink-0">
           Dashboard
         </h1>
 
@@ -221,12 +261,12 @@ const AdminDashboard = () => {
           </div>
 
           <div className="rounded-2xl bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
-            <div className="px-5 sm:px-6 py-4 sm:py-5">
+            <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">
                 Revenue · {periodLabel}
               </p>
               <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-3xl sm:text-4xl font-bold tabular-nums text-slate-900 dark:text-white">
+                <span className="text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums text-slate-900 dark:text-white">
                   ₹{revenue.toLocaleString("en-IN")}
                 </span>
                 {revenueTrend != null && (
@@ -235,7 +275,7 @@ const AdminDashboard = () => {
                       revenueTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                     }`}
                   >
-                    {revenueTrend >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                    {revenueTrend >= 0 ? <ArrowUp size={18} className="text-emerald-600 dark:text-emerald-400" /> : <ArrowDown size={18} className="text-red-600 dark:text-red-400" />}
                     {revenueTrend >= 0 ? "+" : ""}{revenueTrend.toFixed(1)}% vs previous
                   </span>
                 )}
@@ -245,7 +285,7 @@ const AdminDashboard = () => {
         </section>
 
         {/* Supporting stats */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+        <section className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 shrink-0">
           <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-indigo-400/60 dark:border-t-indigo-500/50">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -284,27 +324,57 @@ const AdminDashboard = () => {
           {customerCount == null && <div className="hidden lg:block" />}
         </section>
 
-        {/* Last 6 months – table */}
+        {/* Last 6 months / Last 6 days – table with switch */}
         <section className="rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden min-h-0 flex flex-col flex-1">
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
-            <Calendar size={18} className="text-indigo-500/80 dark:text-indigo-400/70" />
-            <h2 className="text-base font-semibold text-slate-800 dark:text-white">
-              Last 6 months
-            </h2>
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <div className="flex items-center gap-2">
+              <Calendar size={18} className="text-indigo-500/80 dark:text-indigo-400/70" />
+              <h2 className="text-base font-semibold text-slate-800 dark:text-white">
+                {revenueRange === "6months" ? "Last 6 months" : "Last 6 days"}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2 rounded-full bg-slate-200/80 dark:bg-slate-700/80 p-1">
+              <button
+                type="button"
+                onClick={() => setRevenueRange("6days")}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  revenueRange === "6days"
+                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Last 6 days
+              </button>
+              <button
+                type="button"
+                onClick={() => setRevenueRange("6months")}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  revenueRange === "6months"
+                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Last 6 months
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto min-h-0 flex-1">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[280px]">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700/80">
-                  <th className="text-left py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Month</th>
+                  <th className="text-left py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">
+                    {revenueRange === "6months" ? "Month" : "Day"}
+                  </th>
                   <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Revenue</th>
                   <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Orders</th>
                 </tr>
               </thead>
               <tbody>
-                {last6MonthsData.map((row) => (
+                {(revenueRange === "6months" ? last6MonthsData : last6DaysData).map((row) => (
                   <tr key={row.key} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
-                    <td className="py-2 px-5 font-medium text-slate-800 dark:text-slate-200">{row.label}</td>
+                    <td className="py-2 px-5 font-medium text-slate-800 dark:text-slate-200">
+                      {revenueRange === "6months" ? row.label : row.label}
+                    </td>
                     <td className="py-2 px-5 text-right tabular-nums text-slate-800 dark:text-slate-200">
                       ₹{row.revenue.toLocaleString("en-IN")}
                     </td>
@@ -316,7 +386,7 @@ const AdminDashboard = () => {
           </div>
           <div className="px-5 py-2 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/80 shrink-0">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
-              Total · ₹{sixMonthTotal.toLocaleString("en-IN")}
+              Total · ₹{(revenueRange === "6months" ? sixMonthTotal : sixDayTotal).toLocaleString("en-IN")}
             </p>
           </div>
         </section>
