@@ -1,12 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import {
-  Package,
-  Clock,
-  Users,
-  Calendar,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { Package, Clock, Users, Calendar } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
 import { getAllUsers } from "../../services/firestore/userService";
 
@@ -40,6 +33,15 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const PERIOD = { TODAY: "today", DAY: "day", THIS_MONTH: "this_month", MONTH: "month" };
 
+const HERO_IMAGES = [
+  { src: "https://images.unsplash.com/photo-1681264295070-dff4e16d53c5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", alt: "Laundry service" },
+  { src: "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&q=80", alt: "Laundry and cleaning" },
+  { src: "https://images.unsplash.com/photo-1549037173-e3b717902c57?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fGxhdW5kcnl8ZW58MHwwfDB8fHww", alt: "Fresh laundry" },
+  { src: "https://plus.unsplash.com/premium_photo-1723874485367-6e8234ead9ff?q=80&w=1193&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", alt: "Laundry and cleaning" },
+];
+
+const CAROUSEL_INTERVAL_MS = 4500;
+
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [customerCount, setCustomerCount] = useState(null);
@@ -50,10 +52,18 @@ const AdminDashboard = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
   const [revenueRange, setRevenueRange] = useState("6months"); // "6months" | "6days"
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
     const unsubscribe = subscribeToAllOrders(setOrders);
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIndex((i) => (i + 1) % HERO_IMAGES.length);
+    }, CAROUSEL_INTERVAL_MS);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -81,7 +91,7 @@ const AdminDashboard = () => {
     return null;
   }, [period, chosenMonth]);
 
-  const { revenue, total, pending, periodLabel, prevRevenue, prevTotal } = useMemo(() => {
+  const { revenue, total, pending, periodLabel } = useMemo(() => {
     if (targetDay) {
       const dayOrders = orders.filter((o) => isSameDay(getOrderDate(o), targetDay));
       const revenue = dayOrders
@@ -89,18 +99,11 @@ const AdminDashboard = () => {
         .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       const total = dayOrders.length;
       const pending = dayOrders.filter((o) => o.status !== "Completed").length;
-      const prevDay = new Date(targetDay);
-      prevDay.setDate(prevDay.getDate() - 1);
-      const prevDayOrders = orders.filter((o) => isSameDay(getOrderDate(o), prevDay));
-      const prevRevenue = prevDayOrders
-        .filter((o) => o.status === "Completed")
-        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-      const prevTotal = prevDayOrders.length;
       const label =
         period === PERIOD.TODAY
           ? "Today"
           : targetDay.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-      return { revenue, total, pending, periodLabel: label, prevRevenue, prevTotal };
+      return { revenue, total, pending, periodLabel: label };
     }
     if (targetMonthStart) {
       const monthOrders = orders.filter((o) => isSameMonth(getOrderDate(o), targetMonthStart));
@@ -109,16 +112,10 @@ const AdminDashboard = () => {
         .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       const total = monthOrders.length;
       const pending = monthOrders.filter((o) => o.status !== "Completed").length;
-      const prevMonthStart = new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth() - 1, 1);
-      const prevMonthOrders = orders.filter((o) => isSameMonth(getOrderDate(o), prevMonthStart));
-      const prevRevenue = prevMonthOrders
-        .filter((o) => o.status === "Completed")
-        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-      const prevTotal = prevMonthOrders.length;
       const label = `${MONTH_NAMES[targetMonthStart.getMonth()]} ${targetMonthStart.getFullYear()}`;
-      return { revenue, total, pending, periodLabel: label, prevRevenue, prevTotal };
+      return { revenue, total, pending, periodLabel: label };
     }
-    return { revenue: 0, total: 0, pending: 0, periodLabel: "—", prevRevenue: 0, prevTotal: 0 };
+    return { revenue: 0, total: 0, pending: 0, periodLabel: "—" };
   }, [orders, targetDay, targetMonthStart, period]);
 
   const last6MonthsData = useMemo(() => {
@@ -182,8 +179,6 @@ const AdminDashboard = () => {
     return Array.from({ length: 5 }, (_, i) => y - i);
   }, []);
 
-  const revenueTrend = prevRevenue != null && prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : null;
-  const ordersTrend = prevTotal != null && prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null;
   const sixMonthTotal = useMemo(
     () => last6MonthsData.reduce((s, r) => s + r.revenue, 0),
     [last6MonthsData]
@@ -196,9 +191,51 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] transition-colors overflow-auto flex flex-col">
       <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-4 lg:gap-6">
-        <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight shrink-0">
-          Dashboard
-        </h1>
+        {/* Header */}
+        <header className="shrink-0">
+          <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Dashboard
+          </h1>
+        </header>
+
+        {/* Hero carousel - auto-rotating images */}
+        <div className="w-full shrink-0 h-44 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-slate-200 dark:bg-slate-700 relative">
+          <div className="relative w-full h-full rounded-2xl">
+            {HERO_IMAGES.map((img, i) => (
+              <div
+                key={i}
+                className={`absolute inset-0 rounded-2xl transition-opacity duration-700 ease-in-out ${
+                  i === carouselIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                }`}
+                aria-hidden={i !== carouselIndex}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="block w-full h-full object-cover rounded-2xl"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            ))}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-slate-900/60 via-slate-900/20 to-transparent dark:from-slate-900/80 dark:via-slate-900/40 pointer-events-none z-20" />
+            {/* Carousel dots */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              {HERO_IMAGES.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCarouselIndex(i)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    i === carouselIndex
+                      ? "bg-white scale-125"
+                      : "bg-white/60 hover:bg-white/80"
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Period + primary metric */}
         <section className="shrink-0">
@@ -260,68 +297,48 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
-            <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">
+          {/* Overview card: plain gradient background for clear text + Revenue, Orders, Pending, Total Customers */}
+          <div className="relative rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden bg-gradient-to-br from-indigo-50/95 via-white to-slate-50/95 dark:from-slate-800/95 dark:via-slate-800 dark:to-slate-900/95">
+            <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-slate-200/60 dark:border-slate-700/80">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">
                 Revenue · {periodLabel}
               </p>
-              <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums text-slate-900 dark:text-white">
-                  ₹{revenue.toLocaleString("en-IN")}
-                </span>
-                {revenueTrend != null && (
-                  <span
-                    className={`inline-flex items-center gap-1 text-sm font-medium ${
-                      revenueTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-                    }`}
-                  >
-                    {revenueTrend >= 0 ? <ArrowUp size={18} className="text-emerald-600 dark:text-emerald-400" /> : <ArrowDown size={18} className="text-red-600 dark:text-red-400" />}
-                    {revenueTrend >= 0 ? "+" : ""}{revenueTrend.toFixed(1)}% vs previous
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Supporting stats */}
-        <section className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 shrink-0">
-          <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-indigo-400/60 dark:border-t-indigo-500/50">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Orders
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums text-slate-900 dark:text-white">
+                ₹{revenue.toLocaleString("en-IN")}
               </span>
-              <Package size={18} className="text-indigo-400/80 dark:text-indigo-400/70" />
             </div>
-            <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{total}</p>
-            {ordersTrend != null && (
-              <p className={`mt-0.5 text-xs font-medium ${ordersTrend >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                {ordersTrend >= 0 ? "+" : ""}{ordersTrend.toFixed(0)}%
-              </p>
-            )}
-          </div>
-          <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-amber-400/60 dark:border-t-amber-500/50">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Pending
-              </span>
-              <Clock size={18} className="text-amber-500/80" />
-            </div>
-            <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{pending}</p>
-          </div>
-          {customerCount != null && (
-            <div className="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-3.5 shadow-sm border-t-[3px] border-t-emerald-400/60 dark:border-t-emerald-500/50">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Customers
-                </span>
-                <Users size={18} className="text-emerald-500/80 dark:text-emerald-400/70" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-0">
+              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-slate-200/60 dark:border-slate-700/80 border-t border-slate-200/60 dark:border-slate-700/80">
+                <Package size={20} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Orders
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{total}</p>
+                </div>
               </div>
-              <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900 dark:text-white">{customerCount}</p>
+              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-slate-200/60 dark:border-slate-700/80 sm:border-r border-t border-slate-200/60 dark:border-slate-700/80">
+                <Clock size={20} className="text-amber-500 dark:text-amber-400 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Pending
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{pending}</p>
+                </div>
+              </div>
+              {customerCount != null && (
+                <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-t border-slate-200/60 dark:border-slate-700/80 sm:col-span-1 col-span-2 sm:border-l-0">
+                  <Users size={20} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Total customers
+                    </p>
+                    <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{customerCount}</p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-          {/* Spacer when 3 cards so layout doesn't break */}
-          {customerCount == null && <div className="hidden lg:block" />}
+          </div>
         </section>
 
         {/* Last 6 months / Last 6 days – table with switch */}

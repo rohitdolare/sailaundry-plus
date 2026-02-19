@@ -7,7 +7,7 @@ import {
   deleteUserProfile,
 } from "../../services/firestore";
 import { toast } from "react-hot-toast";
-import { Users, CheckCircle, Loader2, Pencil, MapPin, Plus, Trash2, X, Clock, Mail, Phone } from "lucide-react";
+import { Users, Loader2, MapPin, Plus, Trash2, X, Phone } from "lucide-react";
 
 const AdminCustomersPage = () => {
   const [users, setUsers] = useState([]);
@@ -36,6 +36,17 @@ const AdminCustomersPage = () => {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (editingUser) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [editingUser]);
 
   const handleToggleVerified = async (u) => {
     const newVerified = !(u.verified === true);
@@ -146,18 +157,21 @@ const AdminCustomersPage = () => {
         `Delete customer "${u.name || "—"}"? This removes their profile. Existing orders will still show their info.`
       )
     ) {
-      return;
+      return false;
     }
     setDeletingUid(u.uid);
     try {
       await deleteUserProfile(u.uid);
       setUsers((prev) => prev.filter((x) => x.uid !== u.uid));
       toast.success("Customer deleted.");
+      setDeletingUid(null);
+      return true;
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete customer.");
+      setDeletingUid(null);
+      return false;
     }
-    setDeletingUid(null);
   };
 
   // Filter customers by search (name, email, mobile, address)
@@ -176,13 +190,34 @@ const AdminCustomersPage = () => {
         customerToSearchText(u).includes(searchQuery.trim().toLowerCase())
       );
 
-  // Avatar initials: first letter of first word + first letter of last word (e.g. "Rohit Dolare" → "RD")
-  const getInitials = (name) => {
-    const parts = (name || "").trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return "?";
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  // Onboarding date from user (createdAt)
+  const getOnboardingDate = (u) => {
+    const ts = u.createdAt?.toDate?.() || (u.createdAt ? new Date(u.createdAt) : null);
+    return ts ? ts.getTime() : 0;
   };
+  const getOnboardingDateKey = (u) => {
+    const ts = u.createdAt?.toDate?.() || (u.createdAt ? new Date(u.createdAt) : null);
+    if (!ts) return "Unknown date";
+    return ts.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  };
+
+  // Group by onboarding date, recent first; within each group, recent first
+  const sortedForGrouping = [...filteredUsers].sort((a, b) => getOnboardingDate(b) - getOnboardingDate(a));
+  const groupedByDate = sortedForGrouping.reduce((acc, u) => {
+    const key = getOnboardingDateKey(u);
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(u);
+    return acc;
+  }, {});
+  const orderedGroupKeys = Object.keys(groupedByDate).sort((a, b) => {
+    if (a === "Unknown date") return 1;
+    if (b === "Unknown date") return -1;
+    const usersA = groupedByDate[a];
+    const usersB = groupedByDate[b];
+    const dateA = getOnboardingDate(usersA[0]);
+    const dateB = getOnboardingDate(usersB[0]);
+    return dateB - dateA;
+  });
 
   if (loading) {
     return (
@@ -195,21 +230,23 @@ const AdminCustomersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white pb-20 md:pb-0">
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2">
-            <Users size={24} className="text-indigo-500" />
-            <h1 className="text-xl font-bold">Customers</h1>
+            <Users size={20} className="text-indigo-500 shrink-0" />
+            <h1 className="text-base font-semibold text-gray-700 dark:text-gray-300">Customers</h1>
           </div>
           {users.length > 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {searchQuery.trim()
-                ? `${filteredUsers.length} of ${users.length}`
-                : `${users.length} total`}
-            </p>
+            <div
+              className="flex items-center justify-center min-w-[3rem] h-9 px-3 rounded-xl bg-indigo-600 text-white font-bold text-lg tabular-nums"
+              aria-label="Total customers"
+            >
+              {searchQuery.trim() ? `${filteredUsers.length}/${users.length}` : users.length}
+            </div>
           )}
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Only verified customers can log in. &quot;Awaiting verification&quot; means they signed up but cannot sign in until you verify them.
+          Verified customers can log in.<br />
+          Turn the switch on to verify.
         </p>
 
         <div className="relative mb-6">
@@ -239,128 +276,94 @@ const AdminCustomersPage = () => {
             <p className="text-gray-500 dark:text-gray-400">No customers yet.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {searchQuery.trim() && filteredUsers.length === 0 && (
-              <p className="text-center text-gray-500 dark:text-gray-400 py-6">
+              <p className="text-center text-gray-500 dark:text-gray-400 py-6 text-sm">
                 No customers match &quot;{searchQuery.trim()}&quot;.
               </p>
             )}
-            {filteredUsers.map((u) => (
-              <div
-                key={u.uid}
-                className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-slate-800 shadow-sm transition hover:shadow-md dark:shadow-none dark:hover:bg-slate-800/90 ${
-                  u.verified === true
-                    ? "border-l-4 border-l-green-500 border-gray-200 dark:border-slate-700"
-                    : "border-l-4 border-l-amber-500 border-gray-200 dark:border-slate-700"
-                }`}
-              >
-                <div className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                  {/* Avatar + info */}
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
+            {orderedGroupKeys.map((dateKey) => (
+              <section key={dateKey} className="space-y-2">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-50 dark:bg-slate-900 py-1 z-10">
+                  {dateKey}
+                  <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">
+                    ({groupedByDate[dateKey].length})
+                  </span>
+                </h2>
+                <div className="space-y-2">
+                  {groupedByDate[dateKey].map((u) => (
                     <div
-                      role="img"
-                      aria-label={`Avatar for ${u.name || "Customer"}`}
-                      className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white ring-2 ring-gray-300 dark:ring-slate-500"
-                      style={{
-                        backgroundColor: u.verified === true ? "#15803d" : "#b45309",
-                      }}
+                      key={u.uid}
+                      className={`relative overflow-hidden rounded-xl border bg-white dark:bg-slate-800 shadow-sm transition hover:shadow dark:shadow-none dark:hover:bg-slate-800/90 ${
+                        u.verified === true
+                          ? "border-l-2 border-l-green-500 border-gray-200 dark:border-slate-700"
+                          : "border-l-2 border-l-amber-500 border-gray-200 dark:border-slate-700"
+                      }`}
                     >
-                      {getInitials(u.name)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-gray-900 dark:text-white truncate">
-                          {u.name || "—"}
-                        </p>
-                        {u.isWalkIn && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300">
-                            Walk-in
-                          </span>
-                        )}
+                      <div className="px-3 py-2 flex items-center gap-3 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(u)}
+                          className="min-w-0 flex-1 text-left rounded-lg -m-1 p-1 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:ring-inset"
+                        >
+                          <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                            {u.name || "—"}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 flex items-center gap-2">
+                            <span className="truncate">{u.email || u.mobile || "No contact"}</span>
+                            {u.isWalkIn && (
+                              <span className="text-[8px] px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
+                                Walk-in
+                              </span>
+                            )}
+                          </p>
+                        </button>
+                        <div
+                          className="shrink-0 flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                          role="group"
+                          aria-label={u.verified === true ? "Verified – click to unverify" : "Pending – click to verify"}
+                        >
+                          {(u.mobile || u.phone) && (
+                            <a
+                              href={`tel:${(u.mobile || u.phone || "").replace(/\D/g, "")}`}
+                              className="flex items-center justify-center w-9 h-9 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition"
+                              aria-label={`Call ${u.name || "customer"}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Phone size={18} />
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={u.verified === true}
+                            disabled={updatingUid === u.uid}
+                            onClick={() => handleToggleVerified(u)}
+                            className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              u.verified === true ? "bg-green-500" : "bg-gray-300 dark:bg-slate-600"
+                            }`}
+                          >
+                            <span className="sr-only">
+                              {u.verified === true ? "Verified" : "Pending verification"}
+                            </span>
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition ${
+                                u.verified === true ? "translate-x-4" : "translate-x-0.5"
+                              }`}
+                            />
+                            {updatingUid === u.uid && (
+                              <span className="absolute inset-0 flex items-center justify-center">
+                                <Loader2 size={14} className="animate-spin text-white" />
+                              </span>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                      {u.email && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate flex items-center gap-1.5 mt-0.5">
-                          <Mail size={14} className="flex-shrink-0 text-gray-400" />
-                          {u.email}
-                        </p>
-                      )}
-                      {u.mobile && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate flex items-center gap-1.5 mt-0.5">
-                          <Phone size={14} className="flex-shrink-0 text-gray-400" />
-                          {u.mobile}
-                        </p>
-                      )}
-                      {!u.email && !u.mobile && (
-                        <p className="text-sm text-gray-400 dark:text-gray-500 italic">No contact info</p>
-                      )}
                     </div>
-                  </div>
-
-                  {/* Status + actions */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-slate-700 pt-4 sm:pt-0 sm:pl-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium ${
-                        u.verified === true
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
-                      }`}
-                    >
-                      {u.verified === true ? (
-                        <>
-                          <CheckCircle size={14} /> Verified
-                        </>
-                      ) : (
-                        <>
-                          <Clock size={14} /> Awaiting verification
-                        </>
-                      )}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVerified(u)}
-                      disabled={updatingUid === u.uid}
-                      className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition disabled:opacity-50 ${
-                        u.verified === true
-                          ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50"
-                          : "bg-green-600 text-white hover:bg-green-700"
-                      }`}
-                    >
-                      {updatingUid === u.uid ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : u.verified === true ? (
-                        "Unverify"
-                      ) : (
-                        <>
-                          <CheckCircle size={14} /> Verify
-                        </>
-                      )}
-                    </button>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(u)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition"
-                      >
-                        <Pencil size={14} /> Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(u)}
-                        disabled={deletingUid === u.uid}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition disabled:opacity-50"
-                      >
-                        {deletingUid === u.uid ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <>
-                            <Trash2 size={14} /> Delete
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              </section>
             ))}
           </div>
         )}
@@ -460,24 +463,42 @@ const AdminCustomersPage = () => {
                 )}
               </div>
               {!editLoading && (
-                <div className="flex gap-2 p-4 border-t border-gray-200 dark:border-slate-700">
+                <div className="flex flex-col gap-2 p-4 border-t border-gray-200 dark:border-slate-700">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={closeEditModal}
+                      className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      disabled={editSaving}
+                      className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {editSaving ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        "Save"
+                      )}
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={closeEditModal}
-                    className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+                    onClick={async () => {
+                      if (editingUser && (await handleDelete(editingUser))) closeEditModal();
+                    }}
+                    disabled={deletingUid === editingUser?.uid}
+                    className="w-full py-2.5 rounded-xl border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveEdit}
-                    disabled={editSaving}
-                    className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {editSaving ? (
-                      <Loader2 size={18} className="animate-spin" />
+                    {deletingUid === editingUser?.uid ? (
+                      <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      "Save"
+                      <>
+                        <Trash2 size={16} /> Delete customer
+                      </>
                     )}
                   </button>
                 </div>

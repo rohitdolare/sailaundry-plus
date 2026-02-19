@@ -26,6 +26,20 @@ import {
 
 const DEBOUNCE_MS = 350;
 
+function getDefaultPickupDateTime() {
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const h = String(oneHourLater.getHours()).padStart(2, "0");
+  const min = String(oneHourLater.getMinutes()).padStart(2, "0");
+  return {
+    pickupDate: `${y}-${m}-${d}`,
+    pickupTime: `${h}:${min}`,
+  };
+}
+
 const AdminPlaceOrderPage = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -47,10 +61,9 @@ const AdminPlaceOrderPage = () => {
   const [customerMobile, setCustomerMobile] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
 
-  const [formData, setFormData] = useState({
-    pickupDate: "",
-    pickupTime: "",
-    instructions: "",
+  const [formData, setFormData] = useState(() => {
+    const { pickupDate, pickupTime } = getDefaultPickupDateTime();
+    return { pickupDate, pickupTime, instructions: "" };
   });
 
   const [catalog, setCatalog] = useState([]);
@@ -183,18 +196,6 @@ const AdminPlaceOrderPage = () => {
     return () => clearTimeout(t);
   }, [customerSearch]);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (customerListRef.current && !customerListRef.current.contains(e.target)) {
-        setCustomerListOpen(false);
-      }
-    };
-    if (customerListOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [customerListOpen]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -228,7 +229,7 @@ const AdminPlaceOrderPage = () => {
       : { label: "Walk-in", address: (customerAddress || "").trim() };
     return {
       uid,
-      userName: (customerName || selectedUserProfile?.name || "").trim(),
+      userName: (selectedUserId ? (customerName || selectedUserProfile?.name) : customerSearch || "").trim(),
       userMobile: (customerMobile || selectedUserProfile?.mobile || "").trim(),
       pickupLocation,
       pickupDate: formData.pickupDate,
@@ -249,10 +250,10 @@ const AdminPlaceOrderPage = () => {
       return;
     }
 
-    const name = customerName.trim();
+    const name = (selectedUserId ? customerName : customerSearch).trim();
     const mobile = customerMobile.trim();
     if (!name || !mobile) {
-      toast.error("Please enter customer name and mobile.");
+      toast.error("Please enter customer (name) and mobile.");
       return;
     }
 
@@ -271,14 +272,7 @@ const AdminPlaceOrderPage = () => {
           });
           setUsers((prev) => [
             ...prev,
-            {
-              uid,
-              name,
-              mobile,
-              role: "customer",
-              isWalkIn: true,
-              locations: customerAddress.trim() ? [{ label: "Default", address: customerAddress.trim() }] : [],
-            },
+            { uid, name, mobile, role: "customer", isWalkIn: true, locations: customerAddress.trim() ? [{ label: "Default", address: customerAddress.trim() }] : [] },
           ]);
         } catch (err) {
           console.error(err);
@@ -299,7 +293,8 @@ const AdminPlaceOrderPage = () => {
       } else {
         await addOrder(orderData);
         toast.success("Order created successfully!");
-        setFormData({ pickupDate: "", pickupTime: "", instructions: "" });
+        const { pickupDate, pickupTime } = getDefaultPickupDateTime();
+        setFormData({ pickupDate, pickupTime, instructions: "" });
         setItems([{ section: "", item: "", service: "", quantity: 1, price: 0 }]);
         setCustomerName("");
         setCustomerMobile("");
@@ -332,34 +327,54 @@ const AdminPlaceOrderPage = () => {
           onSubmit={handleSubmit}
           className="space-y-6 rounded-3xl bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 p-8 shadow-xl"
         >
-          {/* Single customer flow: search → select or enter new */}
+          {/* Single customer input: search by name/mobile or type new customer name */}
           <div className="space-y-4">
             <div className="relative space-y-3" ref={customerListRef}>
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <User size={18} className="text-indigo-600 dark:text-indigo-400" />
                 Customer
               </label>
-              <div className="relative">
+              <div className="relative flex items-center gap-2">
                 <input
                   type="text"
-                  value={customerSearch}
+                  value={selectedUserId ? `${customerName || "—"} · ${customerMobile || "—"}` : customerSearch}
                   onChange={(e) => {
-                    setCustomerSearch(e.target.value);
-                    setCustomerListOpen(true);
+                    const v = e.target.value;
                     if (selectedUserId) {
                       setSelectedUserId("");
                       setCustomerName("");
                       setCustomerMobile("");
                       setCustomerAddress("");
+                      setCustomerSearch(v);
+                    } else {
+                      setCustomerSearch(v);
                     }
+                    setCustomerListOpen(true);
                   }}
-                  onFocus={() => setCustomerListOpen(true)}
-                  onClick={() => setCustomerListOpen(true)}
-                  placeholder="Search by name or mobile..."
-                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+                  onFocus={() => !selectedUserId && setCustomerListOpen(true)}
+                  onClick={() => !selectedUserId && setCustomerListOpen(true)}
+                  readOnly={!!selectedUserId}
+                  placeholder="Search by name or mobile, or enter new customer name"
+                  className={`w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition ${selectedUserId ? "cursor-default" : ""}`}
                 />
+                {selectedUserId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedUserId("");
+                      setCustomerSearch("");
+                      setCustomerName("");
+                      setCustomerMobile("");
+                      setCustomerAddress("");
+                      setCustomerListOpen(true);
+                    }}
+                    className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition"
+                  >
+                    Change
+                  </button>
+                )}
               </div>
-              {customerListOpen && (() => {
+              {customerListOpen && !selectedUserId && (() => {
                 const q = (debouncedSearch || "").trim().toLowerCase();
                 const filtered =
                   q.length < 2
@@ -373,7 +388,7 @@ const AdminPlaceOrderPage = () => {
                   <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-lg">
                     {filtered.length === 0 ? (
                       <p className="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                        {q.length < 2 ? "Type at least 2 characters to search" : "No customer found — enter details below as new customer"}
+                        {q.length < 2 ? "Type at least 2 characters to search" : "No match — will use as new customer name"}
                       </p>
                     ) : (
                       filtered.map((u) => (
@@ -403,47 +418,15 @@ const AdminPlaceOrderPage = () => {
               })()}
             </div>
 
-            {selectedUserId && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Selected: <span className="font-medium text-gray-900 dark:text-white">{customerName || "—"} · {customerMobile || "—"}</span>
-                {" · "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedUserId("");
-                    setCustomerSearch("");
-                    setCustomerName("");
-                    setCustomerMobile("");
-                    setCustomerAddress("");
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                  Change customer
-                </button>
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Customer name"
-                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile</label>
-                <input
-                  type="tel"
-                  value={customerMobile}
-                  onChange={(e) => setCustomerMobile(e.target.value)}
-                  placeholder="10-digit mobile"
-                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile</label>
+              <input
+                type="tel"
+                value={customerMobile}
+                onChange={(e) => setCustomerMobile(e.target.value)}
+                placeholder="10-digit mobile (required)"
+                className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+              />
             </div>
 
             {locations.length > 0 ? (

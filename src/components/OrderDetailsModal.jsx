@@ -102,9 +102,21 @@ const OrderDetailsModal = ({ order, onClose, onEdit, onDelete }) => {
           <p className="text-sm text-gray-700 flex items-center gap-1">
             <User size={16} /> {order.userName}
           </p>
-          <p className="text-sm text-gray-700 flex items-center gap-1">
-            <Phone size={16} /> {order.userMobile}
-          </p>
+          <div className="text-sm text-gray-700 flex items-center justify-between gap-2">
+            <p className="flex items-center gap-1 min-w-0">
+              <Phone size={16} className="shrink-0" />
+              <span className="truncate">{order.userMobile || "—"}</span>
+            </p>
+            {order.userMobile && (
+              <a
+                href={`tel:${String(order.userMobile).replace(/\D/g, "")}`}
+                className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
+                aria-label={`Call ${order.userName || "customer"}`}
+              >
+                <Phone size={14} /> Call
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Items */}

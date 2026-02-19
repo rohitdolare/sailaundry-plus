@@ -7,10 +7,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* 🌙 Dark mode defaults */
 @layer base {
   body {
-    @apply bg-white dark:bg-gray-900 transition-colors duration-300;
+    @apply bg-white transition-colors duration-300;
   }
 }
 
@@ -66,8 +65,4 @@ html {
     animation-delay: 1000ms;
   }
 
-  /* Smooth transitions for theme changes */
-  .dark-mode-transition {
-    @apply transition-colors duration-300;
-  }
 }
