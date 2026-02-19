@@ -5,8 +5,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Sun,
-  Moon,
   Shield,
   Tags,
   User,
@@ -22,22 +20,6 @@ export default function AdminLayout() {
   const sidebarRef = useRef();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
-
-  const toggleTheme = () => setDarkMode(!darkMode);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -105,25 +87,6 @@ export default function AdminLayout() {
           {user?.name && (
             <p className="text-xs text-white/60 mt-2 truncate">{user.name}</p>
           )}
-        </div>
-
-        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-          <button
-            onClick={toggleTheme}
-            className="w-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700/50 dark:to-slate-700/50 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-slate-700 dark:hover:to-slate-700 flex items-center justify-center gap-2 rounded-lg px-4 py-3 transition duration-300 border border-indigo-200 dark:border-slate-600 font-medium text-gray-900 dark:text-white"
-          >
-            {darkMode ? (
-              <>
-                <Sun size={18} className="text-yellow-500" />
-                <span>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon size={18} className="text-blue-600" />
-                <span>Dark Mode</span>
-              </>
-            )}
-          </button>
         </div>
 
         <nav className="p-4 space-y-2" role="navigation" aria-label="Admin Navigation">

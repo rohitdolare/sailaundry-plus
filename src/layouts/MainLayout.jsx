@@ -8,8 +8,6 @@ import {
   LogOut,
   Phone,
   Menu,
-  Sun,
-  Moon,
   Tags,
   User,
   PackagePlus,
@@ -22,22 +20,6 @@ const MainLayout = () => {
   const sidebarRef = useRef();
   const { logout } = useAuth();
   const navigate = useNavigate();
-
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark",
-  );
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
-
-  const toggleTheme = () => setDarkMode(!darkMode);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -91,17 +73,6 @@ const MainLayout = () => {
             <User size={22} className="text-gray-700 dark:text-gray-300" />
           </button>
           <button
-            onClick={toggleTheme}
-            className="transition hover:scale-105"
-            aria-label="Toggle Theme"
-          >
-            {darkMode ? (
-              <Sun size={22} className="text-yellow-400" />
-            ) : (
-              <Moon size={22} className="text-gray-700" />
-            )}
-          </button>
-          <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             aria-label="Open Menu"
           >
@@ -121,26 +92,6 @@ const MainLayout = () => {
             Sai Laundry+
           </h2>
           <p className="text-xs md:text-sm text-white/80 mt-1">Laundry Management</p>
-        </div>
-
-        {/* Theme Toggle */}
-        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-          <button
-            onClick={toggleTheme}
-            className="w-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700/50 dark:to-slate-700/50 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-slate-700 dark:hover:to-slate-700 mb-0 flex items-center justify-center gap-2 rounded-lg px-4 py-3 transition duration-300 border border-indigo-200 dark:border-slate-600 font-medium text-gray-900 dark:text-white"
-          >
-            {darkMode ? (
-              <>
-                <Sun size={18} className="text-yellow-500" />
-                <span>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon size={18} className="text-blue-600" />
-                <span>Dark Mode</span>
-              </>
-            )}
-          </button>
         </div>
 
         {/* Navigation */}

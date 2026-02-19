@@ -12,6 +12,7 @@ import {
   Clock,
   Loader2,
   Package,
+  Eye,
 } from "lucide-react";
 import OrderDetailsModal from "../../components/OrderDetailsModal";
 
@@ -66,19 +67,13 @@ const StatusBadge = ({ status, compact }) => {
 const OrderCard = ({
   order,
   displayId,
-  onSelect,
+  onViewDetail,
   onDoneClick,
   updatingId,
 }) => {
   const isPending = order.status !== "Completed";
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(order)}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(order)}
-      className="flex flex-col gap-0.5 p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-sm transition cursor-pointer touch-manipulation"
-    >
+    <div className="flex flex-col gap-0.5 p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-sm transition touch-manipulation">
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight" title={order.userName}>
@@ -92,20 +87,30 @@ const OrderCard = ({
           ₹{order.totalAmount ?? 0}
         </span>
       </div>
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100 dark:border-slate-700">
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100 dark:border-slate-700 flex-wrap">
         <StatusBadge status={order.status} compact />
-        {isPending && (
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onDoneClick(e, order.id); }}
-            onKeyDown={(e) => e.stopPropagation()}
-            disabled={updatingId === order.id}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 shrink-0"
-            title="Mark done"
+            onClick={(e) => { e.stopPropagation(); onViewDetail(order); }}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+            title="View detail"
           >
-            <CheckCircle size={12} /> Done
+            <Eye size={12} className="opacity-70" /> View
           </button>
-        )}
+          {isPending && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDoneClick(e, order.id); }}
+              onKeyDown={(e) => e.stopPropagation()}
+              disabled={updatingId === order.id}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+              title="Mark done"
+            >
+              <CheckCircle size={12} /> Done
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -389,7 +394,7 @@ const AdminOrdersPage = () => {
                         key={order.id}
                         order={order}
                         displayId={displayId}
-                        onSelect={setSelectedOrder}
+                        onViewDetail={setSelectedOrder}
                         onDoneClick={handleDoneClick}
                         updatingId={updatingId}
                       />
@@ -405,7 +410,7 @@ const AdminOrdersPage = () => {
                   key={order.id}
                   order={order}
                   displayId={displayId}
-                  onSelect={setSelectedOrder}
+                  onViewDetail={setSelectedOrder}
                   onDoneClick={handleDoneClick}
                   updatingId={updatingId}
                 />
@@ -455,11 +460,7 @@ const AdminOrdersPage = () => {
                           {dayOrders.map((order) => (
                             <tr
                               key={order.id}
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => setSelectedOrder(order)}
-                              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSelectedOrder(order)}
-                              className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition cursor-pointer"
+                              className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition"
                             >
                               <td className="py-2 px-3 min-w-0">
                                 <span className="text-gray-500 dark:text-gray-400 font-mono text-xs mr-2">#{displayId(order)}</span>
@@ -470,9 +471,17 @@ const AdminOrdersPage = () => {
                               <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                                 ₹{order.totalAmount ?? 0}
                               </td>
-                              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                              <td className="py-2 px-3">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <StatusBadge status={order.status} />
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedOrder(order)}
+                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                                    title="View detail"
+                                  >
+                                    <Eye size={12} className="opacity-70" /> View
+                                  </button>
                                   {order.status !== "Completed" && (
                                     <button
                                       type="button"
@@ -493,11 +502,7 @@ const AdminOrdersPage = () => {
                     : sortedOrders.map((order) => (
                         <tr
                           key={order.id}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => setSelectedOrder(order)}
-                          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSelectedOrder(order)}
-                          className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition cursor-pointer"
+                          className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition"
                         >
                           <td className="py-2 px-3 min-w-0">
                             <span className="text-gray-500 dark:text-gray-400 font-mono text-xs mr-2">#{displayId(order)}</span>
@@ -508,9 +513,17 @@ const AdminOrdersPage = () => {
                           <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                             ₹{order.totalAmount ?? 0}
                           </td>
-                          <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-2 px-3">
                             <div className="flex items-center gap-2 flex-wrap">
                               <StatusBadge status={order.status} />
+                              <button
+                                type="button"
+                                onClick={() => setSelectedOrder(order)}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                                title="View detail"
+                              >
+                                <Eye size={12} className="opacity-70" /> View
+                              </button>
                               {order.status !== "Completed" && (
                                 <button
                                   type="button"
