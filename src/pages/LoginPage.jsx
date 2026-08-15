@@ -48,7 +48,7 @@ const LoginPage = () => {
           return;
         }
 
-        // ✅ Build consistent user object (role: "customer" | "admin")
+        // Build consistent user object (role: "customer" | "admin")
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
         const finalUser = {
@@ -61,7 +61,7 @@ const LoginPage = () => {
           expiresAt,
         };
 
-        // ✅ Set in auth context
+        // Set in auth context
         login(finalUser);
         // Redirect by role: admin → /admin, customer → /
         navigate(role === "admin" ? "/admin" : "/");
@@ -77,19 +77,18 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-purple-950 dark:to-gray-950">
-      {/* 🌟 Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-200 to-purple-200 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-full opacity-30 animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-pink-200 to-purple-200 dark:from-pink-900/50 dark:to-purple-900/50 rounded-full opacity-30 animate-pulse delay-700" />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full opacity-20 animate-pulse delay-1000" />
+    <div className="relative min-h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
+      {/* Decorative background mesh */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
+        <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-indigo-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
       </div>
 
-      {/* 📱 Main Content */}
+      {/* Main Content */}
       <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
-          
-          {/* 👈 Left: Illustration & minimal branding */}
+
+          {/* Left: Illustration & minimal branding */}
           <div className="text-center md:text-left space-y-6 animate-fade-in">
             <div className="flex justify-center md:justify-start">
               <img
@@ -99,23 +98,23 @@ const LoginPage = () => {
               />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold text-indigo-600 dark:text-indigo-400">
                 Sai Laundry+
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">Smart laundry, at your doorstep.</p>
             </div>
           </div>
 
-          {/* 👉 Right: Login Form Card */}
+          {/* Right: Login Form Card */}
           <div className="w-full max-w-md mx-auto animate-slide-up">
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-white dark:border-gray-800 rounded-3xl shadow-2xl p-8 space-y-8">
+            <div className="bg-white bg-opacity-70 dark:bg-gray-900 dark:bg-opacity-70 border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 backdrop-blur-xl backdrop-filter shadow-xl rounded-3xl p-8 space-y-8">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
+                <h2 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-4 text-red-700 dark:text-red-400 text-sm animate-shake">
+                <div className="bg-red-50 dark:bg-red-950 dark:bg-opacity-30 border border-red-200 dark:border-red-900 rounded-2xl p-4 text-red-700 dark:text-red-400 text-sm animate-shake">
                   {error}
                 </div>
               )}
@@ -133,7 +132,7 @@ const LoginPage = () => {
                     value={email}
                     required
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                   />
                 </div>
 
@@ -149,12 +148,13 @@ const LoginPage = () => {
                       value={password}
                       required
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 pr-12 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                      className="w-full px-4 pr-12 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -176,12 +176,12 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform transition duration-200 hover:scale-105 disabled:scale-100 disabled:hover:shadow-lg flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-60 text-white font-semibold rounded-2xl shadow-lg transition duration-200 hover:-translate-y-px hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Logging in...</span>
+                      <div className="w-5 h-5 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" />
+                      <span>Signing in...</span>
                     </>
                   ) : (
                     <>
@@ -205,7 +205,7 @@ const LoginPage = () => {
               {/* Sign Up Link */}
               <Link
                 to="/signup"
-                className="w-full py-3 px-4 bg-white dark:bg-gray-800 border-2 border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold rounded-xl transition duration-200 flex items-center justify-center gap-2 group"
+                className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold rounded-2xl transition duration-200 flex items-center justify-center gap-2 group"
               >
                 <span>Create Account</span>
                 <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition" />

@@ -58,7 +58,7 @@ const OrdersPage = () => {
         return <PackageCheck className="text-green-500" size={20} />;
       case "In Progress":
         return (
-          <LoaderCircle className="animate-spin-slow text-blue-500" size={20} />
+          <LoaderCircle className="animate-spin-slow text-indigo-600 dark:text-indigo-400" size={20} />
         );
       case "Pending Pickup":
       case "Pending":
@@ -86,7 +86,7 @@ const OrdersPage = () => {
       />
 
       <div className="p-4">
-        <PageHeader title="Your Orders" />
+        <PageHeader title="Orders" />
 
         {/* Filter & Sort */}
         <div className="mt-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
@@ -98,8 +98,8 @@ const OrdersPage = () => {
                 onClick={() => setSelectedStatus(status)}
                 className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
                   selectedStatus === status
-                    ? "bg-sky-600 border-indigo-600 text-indigo-600"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                    ? "border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                    : "border-gray-200 bg-white bg-opacity-60 text-gray-700 backdrop-blur-md backdrop-filter hover:bg-opacity-90 dark:border-gray-700 dark:border-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 dark:text-gray-200 dark:hover:bg-opacity-80"
                 }`}
               >
                 {status}
@@ -109,7 +109,7 @@ const OrdersPage = () => {
 
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            className="flex items-center gap-1 rounded-full border border-gray-200 bg-white bg-opacity-60 px-3 py-1 text-sm font-medium text-gray-700 backdrop-blur-md backdrop-filter hover:bg-opacity-90 dark:border-gray-700 dark:border-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 dark:text-gray-200 dark:hover:bg-opacity-80"
           >
             {sortOrder === "asc" ? (
               <SortAsc size={18} />
@@ -128,7 +128,7 @@ const OrdersPage = () => {
             </p>
           ) : filteredOrders.length === 0 ? (
             <p className="mt-10 text-center text-gray-500 dark:text-gray-400">
-              No orders found.
+              No orders yet.
             </p>
           ) : (
             filteredOrders.map((order) => {
@@ -140,12 +140,12 @@ const OrdersPage = () => {
                 <div
                   key={order.id}
                   onClick={() => setSelectedOrder(order)}
-                  className="via-sky-50 to-sky-100 cursor-pointer rounded-xl border border-gray-200 bg-gradient-to-br from-white p-5 shadow transition-all duration-300 hover:shadow-xl dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+                  className="cursor-pointer rounded-2xl border border-white border-opacity-60 bg-white bg-opacity-60 p-5 shadow-lg backdrop-blur-xl backdrop-filter transition duration-200 hover:bg-opacity-80 hover:shadow-xl dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 dark:hover:bg-opacity-80"
                 >
                   <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
                     {/* Left Side Info */}
                     <div className="w-full space-y-1 sm:w-auto">
-                      <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
+                      <h3 className="font-heading text-lg font-semibold text-indigo-600 dark:text-indigo-400">
                         Order #{order.orderNumber ?? order.id}
                       </h3>
 
@@ -192,7 +192,7 @@ const OrdersPage = () => {
                         {order.totalAmount ?? "—"}
                       </span>
 
-                      <ChevronRight className="text-sky-400" size={18} />
+                      <ChevronRight className="text-indigo-600 dark:text-indigo-400" size={18} />
                     </div>
                   </div>
                 </div>
@@ -201,13 +201,14 @@ const OrdersPage = () => {
           )}
         </div>
       </div>
-      {/* Floating Place Order Button */}
+      {/* Floating New Order Button */}
       <button
         onClick={() => navigate("/place-order")}
-        className="to-sky-500 fixed bottom-20 right-6 md:bottom-6 z-50 flex items-center gap-2 rounded-full bg-gradient-to-br from-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl active:scale-100"
+        aria-label="Create a new order"
+        className="fixed bottom-20 right-6 md:bottom-6 z-50 flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition hover:-translate-y-px hover:shadow-2xl"
       >
         <Shirt size={18} className="opacity-90" />
-        <span className="hidden sm:inline">Place Order</span>
+        <span className="hidden sm:inline">New Order</span>
       </button>
     </>
   );

@@ -43,8 +43,8 @@ export default function AdminLayout() {
   const adminNavItems = [
     { path: "/admin", label: "Dashboard", icon: <LayoutDashboard size={18} />, exact: true },
     { path: "/admin/orders", label: "Orders", icon: <Package size={18} />, exact: true },
-    { path: "/admin/create-order", label: "Create Order", icon: <ShoppingCart size={18} />, exact: false },
-    { path: "/admin/catalog", label: "Catalog", icon: <Tags size={18} />, exact: true },
+    { path: "/admin/create-order", label: "New Order", icon: <ShoppingCart size={18} />, exact: false },
+    { path: "/admin/catalog", label: "Services", icon: <Tags size={18} />, exact: true },
     { path: "/admin/customers", label: "Customers", icon: <Users size={18} />, exact: true },
     { path: "/admin/profile", label: "Profile", icon: <User size={18} />, exact: true },
   ];
@@ -58,38 +58,45 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="bg-slate-50 flex min-h-screen flex-col text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100 md:flex-row">
+    <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
+      {/* Decorative background mesh (fixed, sits behind all glass surfaces) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
+        <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-indigo-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
+      </div>
+
       {/* Mobile Header */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-white px-3 py-3 shadow dark:bg-gray-800 md:hidden">
-        <h2 className="text-indigo-600 dark:text-indigo-400 text-base font-bold truncate flex items-center gap-2">
+      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between border-b border-white border-opacity-60 bg-white bg-opacity-70 px-3 py-3 backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-70 md:hidden">
+        <h2 className="font-heading text-indigo-600 dark:text-indigo-400 text-base font-bold truncate flex items-center gap-2">
           <Shield size={18} /> Admin
         </h2>
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           aria-label="Open Menu"
+          className="flex h-11 w-11 items-center justify-center"
         >
-          <Menu size={24} className="text-indigo-700 dark:text-indigo-300" />
+          <Menu size={24} className="text-indigo-600 dark:text-indigo-300" />
         </button>
       </header>
 
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto bg-gradient-to-b from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 border-r border-gray-200 dark:border-slate-700 shadow-xl transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:static md:block md:translate-x-0`}
+        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto border-r border-white border-opacity-60 bg-white bg-opacity-60 shadow-xl backdrop-blur-xl backdrop-filter transition-transform duration-300 dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:static md:block md:translate-x-0`}
       >
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-6 md:py-8 text-white shadow-lg">
-          <h2 className="text-xl md:text-2xl font-black tracking-tight truncate flex items-center gap-2">
+        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-6 md:py-8 text-white">
+          <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tight truncate flex items-center gap-2">
             <Shield size={22} /> Admin
           </h2>
-          <p className="text-xs md:text-sm text-white/80 mt-1">
+          <p className="text-xs md:text-sm text-white text-opacity-80 mt-1">
             Sai Laundry+ Admin Panel
           </p>
           {user?.name && (
-            <p className="text-xs text-white/60 mt-2 truncate">{user.name}</p>
+            <p className="text-xs text-white text-opacity-60 mt-2 truncate">{user.name}</p>
           )}
         </div>
 
-        <nav className="p-4 space-y-2" role="navigation" aria-label="Admin Navigation">
+        <nav className="p-4 space-y-1" role="navigation" aria-label="Admin Navigation">
           {adminNavItems.map(({ path, label, icon, exact }) => {
             const isActive = exact ? activePath === path : activePath === path || activePath.startsWith(path + "/");
             return (
@@ -97,10 +104,10 @@ export default function AdminLayout() {
                 key={path}
                 to={path}
                 onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-300 ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700/50"
+                    ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-white hover:bg-opacity-60 dark:hover:bg-gray-800 dark:hover:bg-opacity-60"
                 }`}
               >
                 {icon}
@@ -110,12 +117,12 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        <div className="mx-4 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-slate-600" />
+        <div className="mx-4 h-px bg-gray-200 dark:bg-gray-700" />
 
         <div className="p-4 space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold shadow-lg hover:shadow-xl transition duration-300"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-red-200 bg-white bg-opacity-60 text-red-600 font-semibold transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
           >
             <LogOut size={18} />
             <span>Logout</span>
@@ -129,7 +136,7 @@ export default function AdminLayout() {
 
       {/* Mobile Bottom Bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-white border-opacity-60 bg-white bg-opacity-70 backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-70 pb-[env(safe-area-inset-bottom)] md:hidden"
         role="navigation"
         aria-label="Admin navigation"
       >

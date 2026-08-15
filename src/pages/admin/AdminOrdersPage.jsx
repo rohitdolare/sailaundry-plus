@@ -51,7 +51,7 @@ const StatusBadge = ({ status, compact }) => {
     s === "Completed"
       ? "text-green-600 dark:text-green-400"
       : s === "In Progress"
-      ? "text-blue-600 dark:text-blue-400"
+      ? "text-teal-700 dark:text-teal-400"
       : s === "Pending Pickup"
       ? "text-amber-600 dark:text-amber-400"
       : "text-yellow-600 dark:text-yellow-400";
@@ -73,27 +73,27 @@ const OrderCard = ({
 }) => {
   const isPending = order.status !== "Completed";
   return (
-    <div className="flex flex-col gap-0.5 p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-sm transition touch-manipulation">
+    <div className="flex flex-col gap-0.5 p-2.5 rounded-2xl bg-white bg-opacity-70 dark:bg-gray-800 dark:bg-opacity-70 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 hover:border-indigo-200 dark:hover:border-indigo-400 dark:hover:border-opacity-40 transition touch-manipulation">
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight" title={order.userName}>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate leading-tight" title={order.userName}>
             {order.userName || "—"}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
             Order #{displayId(order)}
           </p>
         </div>
-        <span className="text-sm font-semibold text-gray-900 dark:text-white shrink-0">
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 shrink-0">
           ₹{order.totalAmount ?? 0}
         </span>
       </div>
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100 dark:border-slate-700 flex-wrap">
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100 dark:border-gray-700 flex-wrap">
         <StatusBadge status={order.status} compact />
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onViewDetail(order); }}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
             title="View detail"
           >
             <Eye size={12} className="opacity-70" /> View
@@ -104,7 +104,7 @@ const OrderCard = ({
               onClick={(e) => { e.stopPropagation(); onDoneClick(e, order.id); }}
               onKeyDown={(e) => e.stopPropagation()}
               disabled={updatingId === order.id}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
               title="Mark done"
             >
               <CheckCircle size={12} /> Done
@@ -247,18 +247,14 @@ const AdminOrdersPage = () => {
     order.orderNumber != null ? String(order.orderNumber) : (order.id ? String(order.id).slice(-4) : "—");
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-100 dark:from-indigo-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
-      </div>
-
-      <div className="relative px-3 py-3 max-w-6xl mx-auto pb-20">
+    <div className="w-full transition-colors duration-300">
+      <div className="px-3 py-3 max-w-6xl mx-auto pb-20">
         {/* Top section: title + search/filter — stacked on mobile for cleaner layout */}
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-tight">
-                All Orders
+              <h1 className="font-heading text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                Orders
               </h1>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                 {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
@@ -275,14 +271,14 @@ const AdminOrdersPage = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search orders..."
-                className="w-full h-9 pl-3 pr-8 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full h-9 pl-3 pr-8 rounded-xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter text-gray-900 dark:text-gray-100 text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 aria-label="Search orders by order number, customer, phone, amount, status, date, items, etc."
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-slate-600 text-sm leading-none"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-600 text-sm leading-none"
                   aria-label="Clear search"
                 >
                   ×
@@ -293,23 +289,23 @@ const AdminOrdersPage = () => {
             <button
               type="button"
               onClick={() => setFilterOpen((o) => !o)}
-              className={`inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition shrink-0 ${
+              className={`inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-medium transition shrink-0 ${
                 filterOpen
-                  ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
-                  : "border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                  ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-400"
+                  : "border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
               }`}
               title="Filters & sort"
             >
               <Filter size={14} /> Filter
             </button>
             {filterOpen && (
-              <div className="absolute right-0 top-full mt-1 z-20 w-56 rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg p-3 text-xs" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute right-0 top-full mt-1 z-20 w-56 rounded-2xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-90 dark:bg-gray-900 dark:bg-opacity-90 backdrop-blur-xl backdrop-filter shadow-xl p-3 text-xs" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-2">
                   <label className="block text-gray-500 dark:text-gray-400 font-medium">Status</label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
                   >
                     {STATUS_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
@@ -321,7 +317,7 @@ const AdminOrdersPage = () => {
                       type="date"
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value || "")}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
                     />
                     {dateFilter && (
                       <button
@@ -337,7 +333,7 @@ const AdminOrdersPage = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500"
                   >
                     {SORT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -346,17 +342,17 @@ const AdminOrdersPage = () => {
                   <button
                     type="button"
                     onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
-                    className="w-full inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 text-xs font-medium"
+                    className="w-full inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 text-xs font-medium"
                   >
                     {sortOrder === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                     {sortOrder === "asc" ? "Ascending" : "Descending"}
                   </button>
-                  <label className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-slate-600 cursor-pointer">
+                  <label className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={groupByDay}
                       onChange={(e) => setGroupByDay(e.target.checked)}
-                      className="rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="text-gray-700 dark:text-gray-300 flex items-center gap-1">
                       <Calendar size={12} /> Group by day
@@ -372,14 +368,14 @@ const AdminOrdersPage = () => {
         {/* Mobile: card list — no table, no horizontal scroll */}
         <div className="md:hidden">
           {sortedOrders.length === 0 ? (
-            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400 rounded-xl bg-white/80 dark:bg-slate-800/60 border border-white/50 dark:border-slate-700">
+            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400 rounded-2xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60">
               {searchQuery.trim() ? "No orders match your search." : statusFilter === "All" ? "No orders yet." : `No orders with status "${statusFilter}".`}
             </div>
           ) : groupByDay ? (
             <div className="space-y-0">
               {ordersByDay.map(({ dayKey, orders: dayOrders }, idx) => (
                 <div key={dayKey} className={idx > 0 ? "pt-3 mt-3" : ""}>
-                  <div className="flex items-center gap-1.5 mb-1.5 px-2.5 py-2 rounded-lg bg-gray-200 dark:bg-slate-600">
+                  <div className="flex items-center gap-1.5 mb-1.5 px-2.5 py-2 rounded-xl bg-gray-100 bg-opacity-80 dark:bg-gray-700 dark:bg-opacity-80">
                     <Calendar size={13} className="text-gray-600 dark:text-gray-300 shrink-0" />
                     <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
                       {formatDayLabel(dayKey)}
@@ -420,7 +416,7 @@ const AdminOrdersPage = () => {
         </div>
 
         {/* Desktop: compact 3-column table — combined columns, no horizontal scroll */}
-        <div className="hidden md:block bg-white/80 dark:bg-slate-800/60 backdrop-blur border border-white/50 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
+        <div className="hidden md:block bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 rounded-3xl shadow-lg overflow-hidden">
           {sortedOrders.length === 0 ? (
             <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
               {searchQuery.trim() ? "No orders match your search." : statusFilter === "All" ? "No orders yet." : `No orders with status "${statusFilter}".`}
@@ -434,7 +430,7 @@ const AdminOrdersPage = () => {
                   <col className="w-[1%]" />
                 </colgroup>
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-slate-600 text-left text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-700/50">
+                  <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-400 bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30">
                     <th className="py-2.5 px-3 font-medium">Order · Customer</th>
                     <th className="py-2.5 px-3 font-medium text-right">Amount</th>
                     <th className="py-2.5 px-3 font-medium">Status</th>
@@ -445,9 +441,9 @@ const AdminOrdersPage = () => {
                     ? ordersByDay.map(({ dayKey, orders: dayOrders }, idx) => (
                         <Fragment key={dayKey}>
                           <tr
-                            className={idx > 0 ? "border-t-2 border-gray-300 dark:border-slate-500" : ""}
+                            className={idx > 0 ? "border-t border-gray-200 dark:border-gray-700" : ""}
                           >
-                            <td colSpan={3} className="py-2.5 px-3 font-semibold text-gray-800 dark:text-gray-200 text-xs bg-gray-200 dark:bg-slate-600">
+                            <td colSpan={3} className="py-2.5 px-3 font-semibold text-gray-800 dark:text-gray-200 text-xs bg-gray-100 bg-opacity-80 dark:bg-gray-700 dark:bg-opacity-80">
                               <span className="inline-flex items-center gap-1.5">
                                 <Calendar size={12} className="opacity-80 shrink-0" />
                                 {formatDayLabel(dayKey)}
@@ -460,15 +456,15 @@ const AdminOrdersPage = () => {
                           {dayOrders.map((order) => (
                             <tr
                               key={order.id}
-                              className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition"
+                              className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-30 transition"
                             >
                               <td className="py-2 px-3 min-w-0">
                                 <span className="text-gray-500 dark:text-gray-400 font-mono text-xs mr-2">#{displayId(order)}</span>
-                                <span className="font-medium text-gray-900 dark:text-white truncate inline-block max-w-[200px] align-bottom" title={order.userName}>
+                                <span className="font-medium text-gray-900 dark:text-gray-100 truncate inline-block max-w-[200px] align-bottom" title={order.userName}>
                                   {order.userName || "—"}
                                 </span>
                               </td>
-                              <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                              <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                 ₹{order.totalAmount ?? 0}
                               </td>
                               <td className="py-2 px-3">
@@ -477,7 +473,7 @@ const AdminOrdersPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => setSelectedOrder(order)}
-                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                                     title="View detail"
                                   >
                                     <Eye size={12} className="opacity-70" /> View
@@ -502,15 +498,15 @@ const AdminOrdersPage = () => {
                     : sortedOrders.map((order) => (
                         <tr
                           key={order.id}
-                          className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition"
+                          className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-30 transition"
                         >
                           <td className="py-2 px-3 min-w-0">
                             <span className="text-gray-500 dark:text-gray-400 font-mono text-xs mr-2">#{displayId(order)}</span>
-                            <span className="font-medium text-gray-900 dark:text-white truncate inline-block max-w-[200px] align-bottom" title={order.userName}>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 truncate inline-block max-w-[200px] align-bottom" title={order.userName}>
                               {order.userName || "—"}
                             </span>
                           </td>
-                          <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                          <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                             ₹{order.totalAmount ?? 0}
                           </td>
                           <td className="py-2 px-3">
@@ -519,7 +515,7 @@ const AdminOrdersPage = () => {
                               <button
                                 type="button"
                                 onClick={() => setSelectedOrder(order)}
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 title="View detail"
                               >
                                 <Eye size={12} className="opacity-70" /> View
@@ -546,11 +542,11 @@ const AdminOrdersPage = () => {
         </div>
       </div>
 
-      {/* Floating Create Order – bottom right */}
+      {/* Floating New Order button – bottom right */}
       <Link
         to="/admin/create-order"
-        className="fixed bottom-20 right-5 md:bottom-5 z-10 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition"
-        title="Create order"
+        className="fixed bottom-20 right-5 md:bottom-5 z-10 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl transition hover:opacity-90"
+        title="New order"
       >
         <Plus size={22} />
       </Link>

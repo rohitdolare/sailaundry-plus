@@ -18,7 +18,7 @@ export default defineConfig({
         description: "Laundry Store Management App",
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
+        background_color: '#eef2ff',
         theme_color: '#4f46e5',
         icons: [
           {

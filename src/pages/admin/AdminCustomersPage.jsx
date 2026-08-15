@@ -56,7 +56,7 @@ const AdminCustomersPage = () => {
       setUsers((prev) =>
         prev.map((x) => (x.uid === u.uid ? { ...x, verified: newVerified } : x))
       );
-      toast.success(newVerified ? "Customer verified. They can now login." : "Customer unverified.");
+      toast.success(newVerified ? "Customer verified. They can now sign in." : "Customer unverified.");
     } catch (err) {
       console.error(err);
       toast.error("Failed to update verification.");
@@ -221,23 +221,23 @@ const AdminCustomersPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600 dark:text-gray-400">Loading customers...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white pb-20 md:pb-0">
+    <div className="min-h-screen text-gray-900 dark:text-gray-100 pb-20 md:pb-0">
       <div className="max-w-3xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2">
-            <Users size={20} className="text-indigo-500 shrink-0" />
-            <h1 className="text-base font-semibold text-gray-700 dark:text-gray-300">Customers</h1>
+            <Users size={20} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <h1 className="font-heading text-base font-semibold text-gray-700 dark:text-gray-300">Customers</h1>
           </div>
           {users.length > 0 && (
             <div
-              className="flex items-center justify-center min-w-[3rem] h-9 px-3 rounded-xl bg-indigo-600 text-white font-bold text-lg tabular-nums"
+              className="flex items-center justify-center min-w-[3rem] h-9 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-heading font-bold text-lg tabular-nums shadow-lg"
               aria-label="Total customers"
             >
               {searchQuery.trim() ? `${filteredUsers.length}/${users.length}` : users.length}
@@ -245,8 +245,7 @@ const AdminCustomersPage = () => {
           )}
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Verified customers can log in.<br />
-          Turn the switch on to verify.
+          Verified customers can sign in. Toggle to verify a customer.
         </p>
 
         <div className="relative mb-6">
@@ -254,15 +253,15 @@ const AdminCustomersPage = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email, mobile, or address..."
-            className="w-full h-10 pl-3 pr-9 rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm placeholder-gray-500 dark:placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+            placeholder="Search by name, email, mobile, or address"
+            className="w-full h-10 pl-3 pr-9 rounded-xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter text-gray-900 dark:text-gray-100 text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             aria-label="Search customers"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-600"
               aria-label="Clear search"
             >
               ×
@@ -271,8 +270,8 @@ const AdminCustomersPage = () => {
         </div>
 
         {users.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 p-12 text-center">
-            <Users className="mx-auto mb-3 text-gray-400 dark:text-slate-500" size={40} />
+          <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50 p-12 text-center">
+            <Users className="mx-auto mb-3 text-gray-400 dark:text-gray-500" size={40} />
             <p className="text-gray-500 dark:text-gray-400">No customers yet.</p>
           </div>
         ) : (
@@ -284,7 +283,7 @@ const AdminCustomersPage = () => {
             )}
             {orderedGroupKeys.map((dateKey) => (
               <section key={dateKey} className="space-y-2">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-50 dark:bg-slate-900 py-1 z-10">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 sticky top-0 bg-white bg-opacity-90 dark:bg-gray-900 dark:bg-opacity-90 backdrop-blur-xl backdrop-filter py-1 z-10 rounded-lg px-1">
                   {dateKey}
                   <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">
                     ({groupedByDate[dateKey].length})
@@ -294,25 +293,25 @@ const AdminCustomersPage = () => {
                   {groupedByDate[dateKey].map((u) => (
                     <div
                       key={u.uid}
-                      className={`relative overflow-hidden rounded-xl border bg-white dark:bg-slate-800 shadow-sm transition hover:shadow dark:shadow-none dark:hover:bg-slate-800/90 ${
+                      className={`relative overflow-hidden rounded-2xl border bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter transition hover:bg-opacity-80 dark:hover:bg-opacity-80 ${
                         u.verified === true
-                          ? "border-l-2 border-l-green-500 border-gray-200 dark:border-slate-700"
-                          : "border-l-2 border-l-amber-500 border-gray-200 dark:border-slate-700"
+                          ? "border-l-2 border-l-green-500 border-gray-200 border-opacity-60 dark:border-gray-800 dark:border-opacity-60"
+                          : "border-l-2 border-l-amber-500 border-gray-200 border-opacity-60 dark:border-gray-800 dark:border-opacity-60"
                       }`}
                     >
                       <div className="px-3 py-2 flex items-center gap-3 min-w-0">
                         <button
                           type="button"
                           onClick={() => openEditModal(u)}
-                          className="min-w-0 flex-1 text-left rounded-lg -m-1 p-1 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:ring-inset"
+                          className="min-w-0 flex-1 text-left rounded-xl -m-1 p-1 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-50 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-30 focus:ring-inset"
                         >
-                          <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                          <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
                             {u.name || "—"}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 flex items-center gap-2">
                             <span className="truncate">{u.email || u.mobile || "No contact"}</span>
                             {u.isWalkIn && (
-                              <span className="text-[8px] px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
+                              <span className="text-[8px] px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0 font-medium">
                                 Walk-in
                               </span>
                             )}
@@ -327,7 +326,7 @@ const AdminCustomersPage = () => {
                           {(u.mobile || u.phone) && (
                             <a
                               href={`tel:${(u.mobile || u.phone || "").replace(/\D/g, "")}`}
-                              className="flex items-center justify-center w-9 h-9 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition"
+                              className="flex items-center justify-center w-9 h-9 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-30 transition"
                               aria-label={`Call ${u.name || "customer"}`}
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -340,8 +339,8 @@ const AdminCustomersPage = () => {
                             aria-checked={u.verified === true}
                             disabled={updatingUid === u.uid}
                             onClick={() => handleToggleVerified(u)}
-                            className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              u.verified === true ? "bg-green-500" : "bg-gray-300 dark:bg-slate-600"
+                            className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              u.verified === true ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
                             }`}
                           >
                             <span className="sr-only">
@@ -370,16 +369,16 @@ const AdminCustomersPage = () => {
 
         {/* Edit Customer Modal */}
         {editingUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+            <div className="bg-white bg-opacity-90 dark:bg-gray-900 dark:bg-opacity-90 backdrop-blur-xl backdrop-filter rounded-3xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 dark:border-opacity-80">
+                <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">
                   Edit customer
                 </h3>
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-600 dark:text-gray-400"
+                  className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-400"
                   aria-label="Close"
                 >
                   <X size={20} />
@@ -399,7 +398,7 @@ const AdminCustomersPage = () => {
                         value={editForm.name}
                         onChange={(e) => updateEditForm("name", e.target.value)}
                         placeholder="Customer name"
-                        className="w-full rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                       />
                     </div>
                     <div className="space-y-2">
@@ -411,7 +410,7 @@ const AdminCustomersPage = () => {
                         value={editForm.mobile}
                         onChange={(e) => updateEditForm("mobile", e.target.value)}
                         placeholder="10-digit mobile"
-                        className="w-full rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                       />
                     </div>
                     <div className="space-y-2">
@@ -430,7 +429,7 @@ const AdminCustomersPage = () => {
                       {(editForm.locations || []).map((loc, idx) => (
                         <div
                           key={idx}
-                          className="flex gap-2 items-start p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600"
+                          className="flex gap-2 items-start p-3 rounded-2xl bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 border border-gray-200 dark:border-gray-700"
                         >
                           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
@@ -438,20 +437,20 @@ const AdminCustomersPage = () => {
                               value={loc.label}
                               onChange={(e) => updateLocation(idx, "label", e.target.value)}
                               placeholder="Label (e.g. Home)"
-                              className="rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-900 dark:text-white"
+                              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                             />
                             <input
                               type="text"
                               value={loc.address}
                               onChange={(e) => updateLocation(idx, "address", e.target.value)}
                               placeholder="Address"
-                              className="rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-900 dark:text-white sm:col-span-2"
+                              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 sm:col-span-2"
                             />
                           </div>
                           <button
                             type="button"
                             onClick={() => removeLocation(idx)}
-                            className="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
+                            className="p-2 rounded-xl border border-red-200 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent transition duration-200 shrink-0"
                             aria-label="Remove address"
                           >
                             <Trash2 size={18} />
@@ -463,12 +462,12 @@ const AdminCustomersPage = () => {
                 )}
               </div>
               {!editLoading && (
-                <div className="flex flex-col gap-2 p-4 border-t border-gray-200 dark:border-slate-700">
+                <div className="flex flex-col gap-2 p-4 border-t border-gray-200 dark:border-gray-800 dark:border-opacity-80">
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={closeEditModal}
-                      className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+                      className="flex-1 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                     >
                       Cancel
                     </button>
@@ -476,7 +475,7 @@ const AdminCustomersPage = () => {
                       type="button"
                       onClick={handleSaveEdit}
                       disabled={editSaving}
-                      className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                     >
                       {editSaving ? (
                         <Loader2 size={18} className="animate-spin" />
@@ -491,7 +490,7 @@ const AdminCustomersPage = () => {
                       if (editingUser && (await handleDelete(editingUser))) closeEditModal();
                     }}
                     disabled={deletingUid === editingUser?.uid}
-                    className="w-full py-2.5 rounded-xl border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-2.5 rounded-2xl border border-red-200 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent font-medium transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {deletingUid === editingUser?.uid ? (
                       <Loader2 size={16} className="animate-spin" />

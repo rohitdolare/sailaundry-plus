@@ -44,7 +44,7 @@ const SignupPage = () => {
     return false;
   }
 
-  return true; // ✅ all good
+  return true;
 };
 
 
@@ -70,7 +70,7 @@ const SignupPage = () => {
     await setDoc(doc(db, "users", user.uid), userData);
 
     // 3. Don't auto-login: only verified customers can login
-    toast.success("Account created. You can sign in once admin verifies your account.");
+    toast.success("Account created. You can sign in once your account is verified.");
     navigate("/login");
 
   } catch (error) {
@@ -82,10 +82,11 @@ const SignupPage = () => {
 };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-purple-950 dark:to-gray-950">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-200 to-purple-200 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-full opacity-30 animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-pink-200 to-purple-200 dark:from-pink-900/50 dark:to-purple-900/50 rounded-full opacity-30 animate-pulse delay-700" />
+    <div className="relative min-h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
+      {/* Decorative background mesh */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
+        <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-indigo-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
       </div>
 
       <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-4 py-10">
@@ -100,7 +101,7 @@ const SignupPage = () => {
               />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold text-indigo-600 dark:text-indigo-400">
                 Join Sai Laundry+
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">One signup. Laundry sorted.</p>
@@ -109,9 +110,9 @@ const SignupPage = () => {
 
           {/* Right: Signup form card */}
           <div className="w-full max-w-md mx-auto animate-slide-up">
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-white dark:border-gray-800 rounded-3xl shadow-2xl p-8 space-y-6">
+            <div className="bg-white bg-opacity-70 dark:bg-gray-900 dark:bg-opacity-70 border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 backdrop-blur-xl backdrop-filter shadow-xl rounded-3xl p-8 space-y-6">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create account</h2>
+                <h2 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">Create account</h2>
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
@@ -121,7 +122,7 @@ const SignupPage = () => {
                   value={fullName}
                   required
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                  className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                 />
                 <input
                   type="tel"
@@ -129,7 +130,7 @@ const SignupPage = () => {
                   value={mobile}
                   required
                   onChange={(e) => setMobile(e.target.value)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                  className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                 />
                 <input
                   type="email"
@@ -137,7 +138,7 @@ const SignupPage = () => {
                   value={email}
                   required
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                  className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                 />
                 <input
                   type="password"
@@ -145,16 +146,16 @@ const SignupPage = () => {
                   value={password}
                   required
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-transparent rounded-xl focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
+                  className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-transparent rounded-2xl focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition duration-200"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform transition duration-200 hover:scale-105 disabled:scale-100 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-60 text-white font-semibold rounded-2xl shadow-lg transition duration-200 hover:-translate-y-px hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" />
                       <span>Signing up...</span>
                     </>
                   ) : (

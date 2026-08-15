@@ -37,7 +37,7 @@ const PlaceOrderPage = () => {
         const userLocations = profile?.locations || [];
 
         if (userLocations.length === 0) {
-          toast("No saved locations found. Please add one.");
+          toast("No saved locations yet. Add one to continue.");
           setShowAddLocationModal(true);
         }
 
@@ -131,7 +131,7 @@ const PlaceOrderPage = () => {
 
     try {
       await addOrder(orderData);
-      toast.success("Order placed successfully!");
+      toast.success("Order placed successfully.");
 
       setFormData({
         pickupDate: "",
@@ -147,25 +147,18 @@ const PlaceOrderPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-100 dark:from-indigo-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-pink-100 dark:from-pink-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
-      </div>
+    <div className="relative px-4 py-8">
+      <PageHeader title="New Order" />
 
-      <div className="relative px-4 py-8">
-        <PageHeader title="Place a New Order" />
-
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto mt-6 max-w-3xl space-y-6 rounded-3xl bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 p-8 shadow-xl transition-all duration-300"
-        >
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto mt-6 max-w-3xl space-y-6 rounded-3xl border border-white border-opacity-60 bg-white bg-opacity-60 p-8 shadow-xl backdrop-blur-xl backdrop-filter transition-colors duration-300 dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60"
+      >
         {/* Location */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+              <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-30">
                 <MapPin size={18} className="text-indigo-600 dark:text-indigo-400" />
               </div>
               Pickup Location
@@ -181,7 +174,7 @@ const PlaceOrderPage = () => {
           <select
             value={selectedLocationIndex}
             onChange={(e) => setSelectedLocationIndex(parseInt(e.target.value))}
-            className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition"
+            className="w-full rounded-2xl border border-transparent bg-gray-100 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition"
           >
             {locations.map((loc, index) => (
               <option key={index} value={index}>
@@ -195,8 +188,8 @@ const PlaceOrderPage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                <Calendar size={18} className="text-blue-600 dark:text-blue-400" />
+              <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-30">
+                <Calendar size={18} className="text-indigo-600 dark:text-indigo-400" />
               </div>
               Pickup Date
             </label>
@@ -206,13 +199,13 @@ const PlaceOrderPage = () => {
               value={formData.pickupDate}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition"
+              className="w-full rounded-2xl border border-transparent bg-gray-100 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition"
             />
           </div>
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                <Clock size={18} className="text-purple-600 dark:text-purple-400" />
+              <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-30">
+                <Clock size={18} className="text-indigo-600 dark:text-indigo-400" />
               </div>
               Pickup Time
             </label>
@@ -222,32 +215,30 @@ const PlaceOrderPage = () => {
               value={formData.pickupTime}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition"
+              className="w-full rounded-2xl border border-transparent bg-gray-100 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition"
             />
           </div>
         </div>
 
-       
-
         {/* Items Selector */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gradient-to-r from-indigo-200 to-purple-200 dark:border-slate-700">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30">
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-30">
               <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-white">
               Order Items
             </h3>
           </div>
           {items.map((item, index) => (
             <div
               key={index}
-              className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-gradient-to-r from-gray-50 to-gray-50 dark:from-slate-700/50 dark:to-slate-700/30 p-4 rounded-2xl border border-gray-200 dark:border-slate-600 hover:shadow-md transition"
+              className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-40 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 backdrop-blur-md backdrop-filter transition"
             >
               <select
                 value={item.section}
                 onChange={(e) => handleItemChange(index, "section", e.target.value)}
-                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
+                className="rounded-xl border border-transparent bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
                 <option value="">Select Section</option>
                 {catalog.map((section) => (
@@ -260,7 +251,7 @@ const PlaceOrderPage = () => {
               <select
                 value={item.item}
                 onChange={(e) => handleItemChange(index, "item", e.target.value)}
-                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
+                className="rounded-xl border border-transparent bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
                 <option value="">Select Item</option>
                 {catalog
@@ -275,7 +266,7 @@ const PlaceOrderPage = () => {
               <select
                 value={item.service}
                 onChange={(e) => handleItemChange(index, "service", e.target.value)}
-                className="rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
+                className="rounded-xl border border-transparent bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition text-sm"
               >
                 <option value="">Select Service</option>
                 {catalog
@@ -288,12 +279,12 @@ const PlaceOrderPage = () => {
                   ))}
               </select>
 
-              <div className="flex items-center gap-1 rounded-lg border-2 border-transparent bg-white dark:bg-slate-600 overflow-hidden">
+              <div className="flex items-center gap-1 rounded-xl border border-transparent bg-white dark:bg-gray-700 overflow-hidden">
                 <button
                   type="button"
                   onClick={() => handleItemChange(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
                   disabled={(item.quantity || 1) <= 1}
-                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 disabled:opacity-50 disabled:pointer-events-none transition"
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:pointer-events-none transition"
                   aria-label="Decrease quantity"
                 >
                   <Minus size={18} />
@@ -304,7 +295,7 @@ const PlaceOrderPage = () => {
                 <button
                   type="button"
                   onClick={() => handleItemChange(index, "quantity", (item.quantity || 1) + 1)}
-                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 transition"
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
                   aria-label="Increase quantity"
                 >
                   <Plus size={18} />
@@ -314,7 +305,7 @@ const PlaceOrderPage = () => {
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 p-2 transition flex items-center justify-center"
+                className="rounded-xl border border-red-200 bg-white dark:bg-transparent dark:border-red-900 text-red-600 p-2 transition hover:bg-red-600 hover:text-white hover:border-red-600 flex items-center justify-center"
               >
                 <Trash2 size={18} />
               </button>
@@ -323,7 +314,7 @@ const PlaceOrderPage = () => {
           <button
             type="button"
             onClick={handleAddItem}
-            className="w-full py-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl border border-dashed border-indigo-300 dark:border-indigo-500 dark:border-opacity-50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-20 transition flex items-center justify-center gap-2"
           >
             <Plus size={18} /> Add Another Item
           </button>
@@ -332,7 +323,7 @@ const PlaceOrderPage = () => {
         {/* Instructions */}
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+            <div className="p-2 rounded-xl bg-amber-100 dark:bg-yellow-900 dark:bg-opacity-30">
               <StickyNote size={18} className="text-yellow-600 dark:text-yellow-400" />
             </div>
             Special Instructions
@@ -342,17 +333,17 @@ const PlaceOrderPage = () => {
             value={formData.instructions}
             onChange={handleChange}
             rows="3"
-            className="w-full rounded-xl border-2 border-transparent bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-slate-700 dark:to-slate-700 px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-medium focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-900 transition resize-none"
-            placeholder="e.g. Please handle delicate clothes with care..."
+            className="w-full rounded-2xl border border-transparent bg-amber-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white placeholder-amber-700 placeholder-opacity-60 dark:placeholder-gray-400 font-medium focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-900 transition resize-none"
+            placeholder="e.g. Please handle delicate clothes with care"
           />
         </div>
 
         {/* Order Summary */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700/50 dark:to-slate-700/30 rounded-2xl p-6 border border-indigo-200 dark:border-slate-600">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-6 border border-indigo-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <p className="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
-              <p className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <p className="font-heading text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                 ₹{items.reduce((sum, i) => sum + i.price * i.quantity, 0)}
               </p>
             </div>
@@ -365,7 +356,7 @@ const PlaceOrderPage = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg transition duration-300 hover:-translate-y-px hover:shadow-xl flex items-center justify-center gap-2"
         >
           <Shirt size={20} />
           <span>Place Order</span>
@@ -373,26 +364,25 @@ const PlaceOrderPage = () => {
         </button>
       </form>
 
-        {/* Add Location Modal */}
-        <AddLocationModal
-          isOpen={showAddLocationModal}
-          onClose={() => setShowAddLocationModal(false)}
-          onSave={async (newLoc) => {
-            try {
-              await addLocation(user.uid, newLoc);
-              const updatedProfile = await getUserProfile(user.uid);
-              const updatedLocations = updatedProfile?.locations || [];
-              setLocations(updatedLocations);
-              setSelectedLocationIndex(updatedLocations.length - 1);
-              toast.success("Location added!");
-              setShowAddLocationModal(false);
-            } catch (error) {
-              console.error("Failed to add location:", error);
-              toast.error("Failed to add location.");
-            }
-          }}
-        />
-      </div>
+      {/* Add Location Modal */}
+      <AddLocationModal
+        isOpen={showAddLocationModal}
+        onClose={() => setShowAddLocationModal(false)}
+        onSave={async (newLoc) => {
+          try {
+            await addLocation(user.uid, newLoc);
+            const updatedProfile = await getUserProfile(user.uid);
+            const updatedLocations = updatedProfile?.locations || [];
+            setLocations(updatedLocations);
+            setSelectedLocationIndex(updatedLocations.length - 1);
+            toast.success("Location added.");
+            setShowAddLocationModal(false);
+          } catch (error) {
+            console.error("Failed to add location:", error);
+            toast.error("Failed to add location.");
+          }
+        }}
+      />
     </div>
   );
 };

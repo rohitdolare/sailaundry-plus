@@ -5,36 +5,36 @@ const ContactPage = () => {
   return (
     <div className="mx-auto max-w-2xl p-4 space-y-6">
       <PageHeader
-        title="📞 Contact Us"
-        subtitle="We’re here to help. Reach out for any support or queries."
+        title="Support"
+        subtitle="We're here to help with any questions or issues."
       />
 
-      <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm dark:border-gray-700 dark:from-gray-800 dark:to-gray-900">
+      <div className="rounded-2xl border border-white border-opacity-60 bg-white bg-opacity-60 p-6 shadow-lg backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60">
         <div className="space-y-6">
           <ContactItem
-            icon={<Phone className="text-sky-600 dark:text-sky-400" size={22} />}
+            icon={<Phone className="text-indigo-600 dark:text-indigo-400" size={22} />}
             label="Phone"
             value="+91 91195 47096"
           />
           <ContactItem
-            icon={<Mail className="text-sky-600 dark:text-sky-400" size={22} />}
+            icon={<Mail className="text-indigo-600 dark:text-indigo-400" size={22} />}
             label="Email"
             value="support@sailaundry.in"
           />
           <ContactItem
-            icon={<HelpCircle className="text-sky-600 dark:text-sky-400" size={22} />}
+            icon={<HelpCircle className="text-indigo-600 dark:text-indigo-400" size={22} />}
             label="Hours"
-            value="Available 9AM–9PM, All Days"
+            value="9 AM – 9 PM, all days"
           />
         </div>
       </div>
 
-      {/* 🔍 Store Location Map */}
-      <div className="rounded-3xl border border-gray-200 shadow-sm dark:border-gray-700 overflow-hidden">
-        <div className="flex items-center gap-2 bg-sky-100 dark:bg-sky-900 p-3">
-          <MapPin className="text-sky-700 dark:text-white" size={20} />
-          <h3 className="text-sky-800 dark:text-white text-sm font-semibold">
-            Our Store Location
+      {/* Store Location Map */}
+      <div className="rounded-2xl border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 overflow-hidden shadow-lg">
+        <div className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 p-3">
+          <MapPin className="text-white" size={20} />
+          <h3 className="text-white text-sm font-semibold">
+            Store Location
           </h3>
         </div>
         <iframe
@@ -47,7 +47,7 @@ const ContactPage = () => {
           allowFullScreen
           referrerPolicy="no-referrer-when-downgrade"
         />
-      
+
       </div>
     </div>
   );

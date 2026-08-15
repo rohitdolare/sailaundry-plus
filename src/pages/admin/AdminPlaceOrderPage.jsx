@@ -253,7 +253,7 @@ const AdminPlaceOrderPage = () => {
     const name = (selectedUserId ? customerName : customerSearch).trim();
     const mobile = customerMobile.trim();
     if (!name || !mobile) {
-      toast.error("Please enter customer (name) and mobile.");
+      toast.error("Please enter the customer's name and mobile number.");
       return;
     }
 
@@ -288,11 +288,11 @@ const AdminPlaceOrderPage = () => {
       if (isEditMode) {
         const payload = { ...orderData, status: editingOrder?.status ?? orderData.status };
         await updateOrder(orderId, payload);
-        toast.success("Order updated successfully!");
+        toast.success("Order updated successfully.");
         navigate("/admin/orders");
       } else {
         await addOrder(orderData);
-        toast.success("Order created successfully!");
+        toast.success("Order created successfully.");
         const { pickupDate, pickupTime } = getDefaultPickupDateTime();
         setFormData({ pickupDate, pickupTime, instructions: "" });
         setItems([{ section: "", item: "", service: "", quantity: 1, price: 0 }]);
@@ -310,22 +310,18 @@ const AdminPlaceOrderPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-100 dark:from-indigo-500/10 to-purple-100 dark:to-purple-500/10 rounded-full opacity-20 blur-3xl" />
-      </div>
-
-      <div className="relative px-4 py-8 max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {isEditMode ? "Edit Order" : "Create Order (Admin)"}
+    <div className="w-full transition-colors duration-300">
+      <div className="px-4 py-8 max-w-3xl mx-auto">
+        <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          {isEditMode ? "Edit Order" : "New Order"}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          {isEditMode ? "Update order details" : "Search for a customer or enter details for a new one"}
+          {isEditMode ? "Update order details" : "Search for an existing customer or add a new one"}
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-3xl bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 p-8 shadow-xl"
+          className="space-y-6 rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg p-8"
         >
           {/* Single customer input: search by name/mobile or type new customer name */}
           <div className="space-y-4">
@@ -354,8 +350,8 @@ const AdminPlaceOrderPage = () => {
                   onFocus={() => !selectedUserId && setCustomerListOpen(true)}
                   onClick={() => !selectedUserId && setCustomerListOpen(true)}
                   readOnly={!!selectedUserId}
-                  placeholder="Search by name or mobile, or enter new customer name"
-                  className={`w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition ${selectedUserId ? "cursor-default" : ""}`}
+                  placeholder="Search by name or mobile, or type a new customer name"
+                  className={`w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition ${selectedUserId ? "cursor-default" : ""}`}
                 />
                 {selectedUserId && (
                   <button
@@ -368,7 +364,7 @@ const AdminPlaceOrderPage = () => {
                       setCustomerAddress("");
                       setCustomerListOpen(true);
                     }}
-                    className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition"
+                    className="shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-20 transition"
                   >
                     Change
                   </button>
@@ -385,10 +381,10 @@ const AdminPlaceOrderPage = () => {
                           (u.mobile || "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
                       );
                 return (
-                  <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-lg">
+                  <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-2xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-90 dark:bg-gray-900 dark:bg-opacity-90 backdrop-blur-xl backdrop-filter shadow-xl">
                     {filtered.length === 0 ? (
                       <p className="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                        {q.length < 2 ? "Type at least 2 characters to search" : "No match — will use as new customer name"}
+                        {q.length < 2 ? "Type at least 2 characters to search" : "No match — will create a new customer"}
                       </p>
                     ) : (
                       filtered.map((u) => (
@@ -403,10 +399,10 @@ const AdminPlaceOrderPage = () => {
                             setCustomerListOpen(false);
                             setCustomerSearch("");
                           }}
-                          className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-slate-600 last:border-0 text-sm transition ${
+                          className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-gray-600 last:border-0 text-sm transition ${
                             selectedUserId === u.uid
-                              ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600"
+                              ? "bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-40 text-indigo-700 dark:text-indigo-400 font-medium"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                           }`}
                         >
                           {u.name || "—"} · {u.mobile || "—"}
@@ -425,7 +421,7 @@ const AdminPlaceOrderPage = () => {
                 value={customerMobile}
                 onChange={(e) => setCustomerMobile(e.target.value)}
                 placeholder="10-digit mobile (required)"
-                className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
               />
             </div>
 
@@ -437,7 +433,7 @@ const AdminPlaceOrderPage = () => {
                 <select
                   value={selectedLocationIndex}
                   onChange={(e) => setSelectedLocationIndex(parseInt(e.target.value))}
-                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+                  className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 >
                   {locations.map((loc, i) => (
                     <option key={i} value={i}>
@@ -456,7 +452,7 @@ const AdminPlaceOrderPage = () => {
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
                   placeholder="Pickup address (optional)"
-                  className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                  className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 />
               </div>
             )}
@@ -474,7 +470,7 @@ const AdminPlaceOrderPage = () => {
                 value={formData.pickupDate}
                 onChange={handleChange}
                 required
-                className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
               />
             </div>
             <div className="space-y-2">
@@ -487,26 +483,26 @@ const AdminPlaceOrderPage = () => {
                 value={formData.pickupTime}
                 onChange={handleChange}
                 required
-                className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white focus:border-indigo-500 transition"
+                className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
               />
             </div>
           </div>
 
           {/* Items */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-slate-600">
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
               <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Order items</h3>
+              <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">Order items</h3>
             </div>
             {items.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-gray-50 dark:bg-slate-700/50 p-4 rounded-2xl border border-gray-200 dark:border-slate-600"
+                className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
               >
                 <select
                   value={item.section}
                   onChange={(e) => handleItemChange(index, "section", e.target.value)}
-                  className="rounded-lg bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-indigo-500"
+                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
                 >
                   <option value="">Section</option>
                   {catalog.map((s) => (
@@ -516,7 +512,7 @@ const AdminPlaceOrderPage = () => {
                 <select
                   value={item.item}
                   onChange={(e) => handleItemChange(index, "item", e.target.value)}
-                  className="rounded-lg bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-indigo-500"
+                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
                 >
                   <option value="">Item</option>
                   {catalog.find((s) => s.name === item.section)?.items?.map((it) => (
@@ -526,30 +522,30 @@ const AdminPlaceOrderPage = () => {
                 <select
                   value={item.service}
                   onChange={(e) => handleItemChange(index, "service", e.target.value)}
-                  className="rounded-lg bg-white dark:bg-slate-600 px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-indigo-500"
+                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
                 >
                   <option value="">Service</option>
                   {catalog.find((s) => s.name === item.section)?.items?.find((i) => i.name === item.item)?.services?.map((srv) => (
                     <option key={srv.type} value={srv.type}>{srv.type} (₹{srv.price})</option>
                   ))}
                 </select>
-                <div className="flex items-center gap-0.5 rounded-lg bg-white dark:bg-slate-600 border border-gray-200 dark:border-slate-500 overflow-hidden">
+                <div className="flex items-center gap-0.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => handleItemChange(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
                     disabled={(item.quantity || 1) <= 1}
-                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 disabled:opacity-50 disabled:pointer-events-none transition"
+                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:pointer-events-none transition"
                     aria-label="Decrease quantity"
                   >
                     <Minus size={16} />
                   </button>
-                  <span className="min-w-[1.75rem] text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="min-w-[1.75rem] text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {item.quantity || 1}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleItemChange(index, "quantity", (item.quantity || 1) + 1)}
-                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-500 transition"
+                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
                     aria-label="Increase quantity"
                   >
                     <Plus size={16} />
@@ -558,7 +554,7 @@ const AdminPlaceOrderPage = () => {
                 <button
                   type="button"
                   onClick={() => handleRemoveItem(index)}
-                  className="rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 flex items-center justify-center"
+                  className="rounded-xl border border-red-200 bg-white text-red-600 p-2 flex items-center justify-center transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -567,9 +563,9 @@ const AdminPlaceOrderPage = () => {
             <button
               type="button"
               onClick={handleAddItem}
-              className="w-full py-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-2xl border border-dashed border-indigo-300 dark:border-indigo-400 dark:border-opacity-50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-20 transition flex items-center justify-center gap-2"
             >
-              <Plus size={18} /> Add another item
+              <Plus size={18} /> Add item
             </button>
           </div>
 
@@ -583,22 +579,22 @@ const AdminPlaceOrderPage = () => {
               value={formData.instructions}
               onChange={handleChange}
               rows={3}
-              placeholder="Optional notes..."
-              className="w-full rounded-xl border-2 border-transparent bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 resize-none focus:border-indigo-500 transition"
+              placeholder="Optional notes"
+              className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
             />
           </div>
 
           {/* Total & submit */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-700/50 rounded-2xl p-6 border border-indigo-200 dark:border-slate-600">
+          <div className="bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-800">
             <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
-            <p className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+            <p className="font-heading text-3xl font-bold text-indigo-600 dark:text-indigo-400">
               ₹{items.reduce((sum, i) => sum + i.price * i.quantity, 0)}
             </p>
           </div>
           <button
             type="submit"
             disabled={loading || loadingOrder}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Shirt size={20} />
             <span>

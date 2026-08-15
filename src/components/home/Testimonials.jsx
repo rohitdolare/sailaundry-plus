@@ -28,7 +28,7 @@ export const Testimonials = () => {
   return (
     <div className="mt-16 space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
           What Our Customers Say
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
@@ -40,11 +40,8 @@ export const Testimonials = () => {
         {testimonials.map((t, idx) => (
           <div
             key={idx}
-            className="relative group rounded-2xl bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-800/60 dark:to-slate-800/40 p-8 shadow-lg hover:shadow-xl dark:shadow-lg dark:hover:shadow-purple-500/10 backdrop-blur-xl border border-white/50 dark:border-slate-700/60 transition duration-300 hover:scale-105 transform"
+            className="relative group rounded-3xl bg-white bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 shadow-lg dark:bg-gray-900 dark:bg-opacity-60 dark:border-gray-800 dark:border-opacity-60 p-8 transition duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500"
           >
-            {/* Gradient background on hover */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/5 dark:from-indigo-500/10 to-purple-500/5 dark:to-purple-500/10 opacity-0 group-hover:opacity-100 transition duration-300" />
-
             <div className="relative space-y-4">
               {/* Stars */}
               <div className="flex gap-1">
@@ -59,14 +56,14 @@ export const Testimonials = () => {
               </p>
 
               {/* Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-slate-600 to-transparent" />
+              <div className="h-px bg-gray-200 dark:bg-gray-700" />
 
               {/* User Info */}
               <div className="flex items-center gap-4">
                 <img
                   src={t.image}
                   alt={t.name}
-                  className="h-12 w-12 rounded-full border-2 border-indigo-400 dark:border-indigo-500/50 object-cover shadow-md dark:shadow-lg"
+                  className="h-12 w-12 rounded-full border-2 border-white border-opacity-80 shadow-md dark:border-gray-800 dark:border-opacity-80 object-cover"
                 />
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white">

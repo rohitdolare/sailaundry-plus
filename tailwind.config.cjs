@@ -1,11 +1,23 @@
+const colors = require('tailwindcss/colors');
+
 module.exports = {
-  purge: [],
+  mode: 'jit',
+  purge: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class', // or 'media' or 'class'
   theme: {
-    extend: {},
+    extend: {
+      colors,
+      fontFamily: {
+        heading: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+    },
   },
   variants: {
-    extend: {},
+    extend: {
+      backgroundOpacity: ['dark'],
+      backdropBlur: ['responsive'],
+      backdropFilter: ['responsive'],
+    },
   },
   plugins: [],
 };

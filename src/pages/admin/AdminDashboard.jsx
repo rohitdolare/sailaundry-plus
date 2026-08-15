@@ -189,22 +189,22 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] transition-colors overflow-auto flex flex-col">
+    <div className="w-full transition-colors overflow-auto flex flex-col">
       <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-4 lg:gap-6">
         {/* Header */}
         <header className="shrink-0">
-          <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="font-heading text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
             Dashboard
           </h1>
         </header>
 
         {/* Hero carousel - auto-rotating images */}
-        <div className="w-full shrink-0 h-44 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-slate-200 dark:bg-slate-700 relative">
-          <div className="relative w-full h-full rounded-2xl">
+        <div className="w-full shrink-0 h-44 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-3xl border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 bg-gray-200 dark:bg-gray-700 relative shadow-lg">
+          <div className="relative w-full h-full rounded-3xl">
             {HERO_IMAGES.map((img, i) => (
               <div
                 key={i}
-                className={`absolute inset-0 rounded-2xl transition-opacity duration-700 ease-in-out ${
+                className={`absolute inset-0 rounded-3xl transition-opacity duration-700 ease-in-out ${
                   i === carouselIndex ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
                 aria-hidden={i !== carouselIndex}
@@ -212,12 +212,12 @@ const AdminDashboard = () => {
                 <img
                   src={img.src}
                   alt={img.alt}
-                  className="block w-full h-full object-cover rounded-2xl"
+                  className="block w-full h-full object-cover rounded-3xl"
                   referrerPolicy="no-referrer"
                 />
               </div>
             ))}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-slate-900/60 via-slate-900/20 to-transparent dark:from-slate-900/80 dark:via-slate-900/40 pointer-events-none z-20" />
+            <div className="absolute inset-0 rounded-3xl bg-gray-900 bg-opacity-40 dark:bg-opacity-60 pointer-events-none z-20" />
             {/* Carousel dots */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
               {HERO_IMAGES.map((_, i) => (
@@ -228,7 +228,7 @@ const AdminDashboard = () => {
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     i === carouselIndex
                       ? "bg-white scale-125"
-                      : "bg-white/60 hover:bg-white/80"
+                      : "bg-white bg-opacity-60 hover:bg-opacity-80"
                   }`}
                   aria-label={`Go to slide ${i + 1}`}
                 />
@@ -240,24 +240,24 @@ const AdminDashboard = () => {
         {/* Period + primary metric */}
         <section className="shrink-0">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 tracking-wide">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 tracking-wide">
               Overview
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {[
                 { key: PERIOD.TODAY, label: "Today" },
-                { key: PERIOD.DAY, label: "Date" },
+                { key: PERIOD.DAY, label: "Day" },
                 { key: PERIOD.THIS_MONTH, label: "This month" },
-                { key: PERIOD.MONTH, label: "Custom" },
+                { key: PERIOD.MONTH, label: "Month" },
               ].map(({ key, label }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setPeriod(key)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${
                     period === key
-                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-600/50 shadow-sm"
-                      : "bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-600/80"
+                      ? "bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
+                      : "bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-80 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 border-opacity-80 dark:border-gray-600 dark:border-opacity-80"
                   }`}
                 >
                   {label}
@@ -269,14 +269,14 @@ const AdminDashboard = () => {
                     type="date"
                     value={chosenDate}
                     onChange={(e) => setChosenDate(e.target.value)}
-                    className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200"
+                    className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200"
                   />
                 ) : (
                   <span className="flex gap-1.5">
                     <select
                       value={chosenMonth ? chosenMonth.slice(5, 7) : "01"}
                       onChange={(e) => setChosenMonth(`${chosenMonth.slice(0, 4)}-${e.target.value.padStart(2, "0")}`)}
-                      className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm"
+                      className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm"
                     >
                       {MONTH_NAMES.map((m, i) => (
                         <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>
@@ -285,7 +285,7 @@ const AdminDashboard = () => {
                     <select
                       value={chosenMonth ? chosenMonth.slice(0, 4) : new Date().getFullYear()}
                       onChange={(e) => setChosenMonth(`${e.target.value}-${(chosenMonth || "").slice(5, 7) || "01"}`)}
-                      className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm"
+                      className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm"
                     >
                       {years.map((y) => (
                         <option key={y} value={y}>{y}</option>
@@ -297,43 +297,43 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Overview card: plain gradient background for clear text + Revenue, Orders, Pending, Total Customers */}
-          <div className="relative rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden bg-gradient-to-br from-indigo-50/95 via-white to-slate-50/95 dark:from-slate-800/95 dark:via-slate-800 dark:to-slate-900/95">
-            <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-slate-200/60 dark:border-slate-700/80">
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">
+          {/* Overview card: Revenue, Orders, Pending, Total Customers */}
+          <div className="relative rounded-3xl border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 overflow-hidden bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter shadow-lg">
+            <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
                 Revenue · {periodLabel}
               </p>
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums text-slate-900 dark:text-white">
+              <span className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
                 ₹{revenue.toLocaleString("en-IN")}
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-0">
-              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-slate-200/60 dark:border-slate-700/80 border-t border-slate-200/60 dark:border-slate-700/80">
-                <Package size={20} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80 border-t border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80">
+                <Package size={20} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Orders
                   </p>
-                  <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{total}</p>
+                  <p className="font-heading text-xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{total}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-slate-200/60 dark:border-slate-700/80 sm:border-r border-t border-slate-200/60 dark:border-slate-700/80">
+              <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-r border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80 sm:border-r border-t border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80">
                 <Clock size={20} className="text-amber-500 dark:text-amber-400 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Pending
                   </p>
-                  <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{pending}</p>
+                  <p className="font-heading text-xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{pending}</p>
                 </div>
               </div>
               {customerCount != null && (
-                <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-t border-slate-200/60 dark:border-slate-700/80 sm:col-span-1 col-span-2 sm:border-l-0">
+                <div className="flex items-center gap-3 px-5 sm:px-6 lg:px-8 py-3.5 border-t border-gray-200 border-opacity-60 dark:border-gray-700 dark:border-opacity-80 sm:col-span-1 col-span-2 sm:border-l-0">
                   <Users size={20} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Total customers
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Customers
                     </p>
-                    <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{customerCount}</p>
+                    <p className="font-heading text-xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{customerCount}</p>
                   </div>
                 </div>
               )}
@@ -342,22 +342,22 @@ const AdminDashboard = () => {
         </section>
 
         {/* Last 6 months / Last 6 days – table with switch */}
-        <section className="rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden min-h-0 flex flex-col flex-1">
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+        <section className="rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg overflow-hidden min-h-0 flex flex-col flex-1">
+          <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80 flex flex-wrap items-center justify-between gap-3 bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30 shrink-0">
             <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-indigo-500/80 dark:text-indigo-400/70" />
-              <h2 className="text-base font-semibold text-slate-800 dark:text-white">
+              <Calendar size={18} className="text-indigo-600 dark:text-indigo-400" />
+              <h2 className="font-heading text-base font-semibold text-gray-800 dark:text-gray-100">
                 {revenueRange === "6months" ? "Last 6 months" : "Last 6 days"}
               </h2>
             </div>
-            <div className="flex items-center gap-2 rounded-full bg-slate-200/80 dark:bg-slate-700/80 p-1">
+            <div className="flex items-center gap-2 rounded-xl bg-gray-100 bg-opacity-80 dark:bg-gray-700 dark:bg-opacity-80 p-1">
               <button
                 type="button"
                 onClick={() => setRevenueRange("6days")}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   revenueRange === "6days"
-                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 }`}
               >
                 Last 6 days
@@ -365,10 +365,10 @@ const AdminDashboard = () => {
               <button
                 type="button"
                 onClick={() => setRevenueRange("6months")}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   revenueRange === "6months"
-                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 }`}
               >
                 Last 6 months
@@ -378,31 +378,31 @@ const AdminDashboard = () => {
           <div className="overflow-x-auto min-h-0 flex-1">
             <table className="w-full text-sm min-w-[280px]">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-700/80">
-                  <th className="text-left py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80">
+                  <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">
                     {revenueRange === "6months" ? "Month" : "Day"}
                   </th>
-                  <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Revenue</th>
-                  <th className="text-right py-2 px-5 font-semibold text-slate-500 dark:text-slate-400">Orders</th>
+                  <th className="text-right py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Revenue</th>
+                  <th className="text-right py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Orders</th>
                 </tr>
               </thead>
               <tbody>
                 {(revenueRange === "6months" ? last6MonthsData : last6DaysData).map((row) => (
-                  <tr key={row.key} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
-                    <td className="py-2 px-5 font-medium text-slate-800 dark:text-slate-200">
+                  <tr key={row.key} className="border-b border-gray-50 dark:border-gray-800 dark:border-opacity-50 last:border-0">
+                    <td className="py-2 px-5 font-medium text-gray-800 dark:text-gray-200">
                       {revenueRange === "6months" ? row.label : row.label}
                     </td>
-                    <td className="py-2 px-5 text-right tabular-nums text-slate-800 dark:text-slate-200">
+                    <td className="py-2 px-5 text-right tabular-nums text-gray-800 dark:text-gray-200">
                       ₹{row.revenue.toLocaleString("en-IN")}
                     </td>
-                    <td className="py-2 px-5 text-right tabular-nums text-slate-600 dark:text-slate-300">{row.orders}</td>
+                    <td className="py-2 px-5 text-right tabular-nums text-gray-600 dark:text-gray-300">{row.orders}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="px-5 py-2 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/80 shrink-0">
-            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          <div className="px-5 py-2 bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-40 border-t border-gray-100 dark:border-gray-800 dark:border-opacity-80 shrink-0">
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
               Total · ₹{(revenueRange === "6months" ? sixMonthTotal : sixDayTotal).toLocaleString("en-IN")}
             </p>
           </div>

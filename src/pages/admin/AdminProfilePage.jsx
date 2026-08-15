@@ -39,7 +39,7 @@ const AdminProfilePage = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] flex items-center justify-center p-6 text-slate-500 dark:text-slate-400">
+      <div className="min-h-screen w-full flex items-center justify-center p-6 text-gray-500 dark:text-gray-400">
         Loading...
       </div>
     );
@@ -51,24 +51,24 @@ const AdminProfilePage = () => {
   const displayEmail = user.email || "—";
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#0f1114] transition-colors overflow-auto flex flex-col">
+    <div className="min-h-screen w-full transition-colors overflow-auto flex flex-col">
       <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-4 lg:gap-6">
-        <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight shrink-0">
+        <h1 className="font-heading text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight shrink-0">
           Profile
         </h1>
 
-        <section className="rounded-2xl bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+        <section className="rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg overflow-hidden">
           <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
                   <User size={28} className="text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                  <h2 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">
                     {displayName}
                   </h2>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-600/50">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
                     <Shield size={12} />
                     Admin
                   </span>
@@ -78,7 +78,7 @@ const AdminProfilePage = () => {
                 <button
                   type="button"
                   onClick={() => setEditMode(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-600/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 dark:hover:bg-opacity-50 transition"
                 >
                   <Pencil size={16} />
                   Edit
@@ -87,25 +87,25 @@ const AdminProfilePage = () => {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/80 p-4">
-                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+              <div className="rounded-2xl bg-white bg-opacity-50 dark:bg-gray-800 dark:bg-opacity-50 border border-gray-100 dark:border-gray-700 dark:border-opacity-80 p-4">
+                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
                   <User size={14} />
-                  Full Name
+                  Name
                 </label>
                 {editMode ? (
                   <input
                     value={formData.name}
                     onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Your name"
                   />
                 ) : (
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{displayName}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{displayName}</p>
                 )}
               </div>
 
-              <div className="rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/80 p-4">
-                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+              <div className="rounded-2xl bg-white bg-opacity-50 dark:bg-gray-800 dark:bg-opacity-50 border border-gray-100 dark:border-gray-700 dark:border-opacity-80 p-4">
+                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
                   <Phone size={14} />
                   Mobile
                 </label>
@@ -113,21 +113,21 @@ const AdminProfilePage = () => {
                   <input
                     value={formData.mobile}
                     onChange={(e) => setFormData((prev) => ({ ...prev, mobile: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Mobile number"
                   />
                 ) : (
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{displayMobile}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{displayMobile}</p>
                 )}
               </div>
 
-              <div className="sm:col-span-2 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/80 p-4">
-                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+              <div className="sm:col-span-2 rounded-2xl bg-white bg-opacity-50 dark:bg-gray-800 dark:bg-opacity-50 border border-gray-100 dark:border-gray-700 dark:border-opacity-80 p-4">
+                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
                   <Mail size={14} />
                   Email
                 </label>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{displayEmail}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Email is managed by your login account.</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{displayEmail}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Email is tied to your login and can't be changed here.</p>
               </div>
             </div>
 
@@ -139,7 +139,7 @@ const AdminProfilePage = () => {
                     setEditMode(false);
                     setFormData({ name: displayProfile.name ?? "", mobile: displayProfile.mobile ?? "" });
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <X size={16} />
                   Cancel
@@ -148,7 +148,7 @@ const AdminProfilePage = () => {
                   type="button"
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-60 transition"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white disabled:opacity-60 transition shadow-lg"
                 >
                   <Save size={16} />
                   {loading ? "Saving..." : "Save"}

@@ -65,7 +65,7 @@ const AdminCatalogPage = () => {
     e.preventDefault();
     const name = newSectionName.trim();
     if (!name) {
-      toast.error("Enter section name.");
+      toast.error("Enter a section name.");
       return;
     }
     setAddingSection(true);
@@ -156,18 +156,18 @@ const AdminCatalogPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600 dark:text-gray-400">Loading catalog...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white pb-20 md:pb-0">
+    <div className="min-h-screen text-gray-900 dark:text-gray-100 pb-20 md:pb-0">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 min-w-0">
         <div className="flex items-center gap-2 mb-6">
-          <Tags size={24} className="text-indigo-500" />
-          <h1 className="text-xl font-bold">Edit Catalog</h1>
+          <Tags size={24} className="text-indigo-600 dark:text-indigo-400" />
+          <h1 className="font-heading text-xl font-bold">Services</h1>
         </div>
 
         {/* Add section */}
@@ -177,12 +177,12 @@ const AdminCatalogPage = () => {
             value={newSectionName}
             onChange={(e) => setNewSectionName(e.target.value)}
             placeholder="New section name (e.g. Men, Women)"
-            className="flex-1 min-w-0 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-white"
+            className="flex-1 min-w-0 rounded-xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
           <button
             type="submit"
             disabled={addingSection}
-            className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 shrink-0"
+            className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0 shadow-lg transition"
           >
             <Plus size={16} /> Add section
           </button>
@@ -196,9 +196,9 @@ const AdminCatalogPage = () => {
             catalog.map((section) => (
               <div
                 key={section.id}
-                className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-sm"
+                className="rounded-2xl border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter shadow-lg overflow-hidden"
               >
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center p-3 border-b border-gray-100 dark:border-slate-700">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center p-3 border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <button
                       type="button"
@@ -216,7 +216,7 @@ const AdminCatalogPage = () => {
                       type="text"
                       value={section.name || ""}
                       onChange={(e) => updateSection(section.id, () => ({ name: e.target.value }))}
-                      className="flex-1 min-w-0 bg-transparent text-sm font-semibold text-gray-900 dark:text-white border-none focus:ring-0 px-1"
+                      className="flex-1 min-w-0 bg-transparent text-sm font-semibold text-gray-900 dark:text-gray-100 border-none focus:ring-0 px-1"
                       placeholder="Section name"
                     />
                   </div>
@@ -225,14 +225,14 @@ const AdminCatalogPage = () => {
                       type="button"
                       onClick={() => handleSaveSection(section)}
                       disabled={savingId === section.id}
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-50 min-h-[2.5rem]"
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-50 min-h-[2.5rem]"
                     >
                       <Save size={14} /> Save
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteSection(section)}
-                      className="inline-flex items-center justify-center p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 min-h-[2.5rem] min-w-[2.5rem]"
+                      className="inline-flex items-center justify-center p-2 rounded-xl border border-red-200 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent transition duration-200 min-h-[2.5rem] min-w-[2.5rem]"
                       title="Delete section"
                       aria-label="Delete section"
                     >
@@ -249,20 +249,20 @@ const AdminCatalogPage = () => {
                         className="pl-4 border-l-2 border-indigo-200 dark:border-indigo-800 space-y-2"
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <Package size={14} className="text-indigo-500 shrink-0" />
+                          <Package size={14} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                           <input
                             type="text"
                             value={item.name || ""}
                             onChange={(e) =>
                               setItemField(section.id, itemIndex, "name", e.target.value)
                             }
-                            className="flex-1 min-w-0 rounded border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 px-2 py-1.5 text-sm text-gray-900 dark:text-white"
+                            className="flex-1 min-w-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100"
                             placeholder="Item name"
                           />
                           <button
                             type="button"
                             onClick={() => removeItem(section.id, itemIndex)}
-                            className="inline-flex items-center justify-center p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0 min-h-[2.25rem]"
+                            className="inline-flex items-center justify-center p-2 rounded-xl border border-red-200 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent transition duration-200 shrink-0 min-h-[2.25rem]"
                             title="Remove item"
                             aria-label="Remove item"
                           >
@@ -287,7 +287,7 @@ const AdminCatalogPage = () => {
                                     e.target.value
                                   )
                                 }
-                                className="min-w-0 flex-1 rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5 text-gray-900 dark:text-white sm:max-w-[8rem]"
+                                className="min-w-0 flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-gray-100 sm:max-w-[8rem]"
                                 placeholder="Service"
                               />
                               <span className="text-gray-500 dark:text-gray-400 shrink-0">₹</span>
@@ -304,12 +304,12 @@ const AdminCatalogPage = () => {
                                     parseInt(e.target.value, 10) || 0
                                   )
                                 }
-                                className="w-20 rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5 text-gray-900 dark:text-white shrink-0"
+                                className="w-20 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-gray-100 shrink-0"
                               />
                               <button
                                 type="button"
                                 onClick={() => removeService(section.id, itemIndex, svcIndex)}
-                                className="inline-flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0 min-h-[2rem]"
+                                className="inline-flex items-center justify-center p-2 rounded-xl border border-red-200 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent transition duration-200 shrink-0 min-h-[2rem]"
                                 title="Remove service"
                                 aria-label="Remove service"
                               >

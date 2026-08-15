@@ -6,25 +6,19 @@ const actions = [
     icon: PackageOpen,
     label: "Track Orders",
     path: "/orders",
-    color: "from-purple-500 to-pink-500",
-    bgColor: "bg-purple-50 dark:bg-purple-950/30",
     description: "View status & updates",
   },
   {
     icon: User,
-    label: "Manage Profile",
+    label: "Profile",
     path: "/profile",
-    color: "from-indigo-500 to-purple-500",
-    bgColor: "bg-indigo-50 dark:bg-indigo-950/30",
     description: "Settings & preferences",
   },
   {
     icon: Layers,
-    label: "View Catalog",
+    label: "Services",
     path: "/catalog",
-    color: "from-blue-500 to-cyan-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-    description: "Browse services",
+    description: "Browse pricing & options",
   },
 ];
 
@@ -34,7 +28,7 @@ export const QuickActions = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
           Quick Actions
         </h2>
         <p className="text-gray-600 dark:text-gray-300">
@@ -49,14 +43,11 @@ export const QuickActions = () => {
             <button
               key={i}
               onClick={() => navigate(action.path)}
-              className={`${action.bgColor} dark:bg-slate-800/50 group relative overflow-hidden rounded-2xl p-6 border border-white/50 dark:border-slate-700/60 backdrop-blur-sm transition duration-300 hover:shadow-lg dark:hover:shadow-purple-500/10 transform hover:scale-105 text-left`}
+              className="group relative overflow-hidden rounded-2xl bg-white bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 shadow-lg dark:bg-gray-900 dark:bg-opacity-60 dark:border-gray-800 dark:border-opacity-60 p-6 transition duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500 text-left"
             >
-              {/* Gradient background on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition duration-300`} />
-
               <div className="relative space-y-4">
                 {/* Icon */}
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${action.color}`}>
+                <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600">
                   <Icon className="w-6 h-6 text-white" />
                 </div>
 
@@ -78,4 +69,3 @@ export const QuickActions = () => {
     </div>
   );
 };
-

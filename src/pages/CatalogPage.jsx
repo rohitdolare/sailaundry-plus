@@ -22,28 +22,28 @@ const CatalogPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#ffe3ec] via-[#d2f2ff] to-[#f5e0ff] dark:bg-gray-900 px-4 py-10">
+    <div className="px-4 py-10">
       <div className="max-w-6xl mx-auto">
-        <PageHeader title="Our Services" />
+        <PageHeader title="Services" />
 
         {loading ? (
-          <p className="text-center text-gray-600 dark:text-gray-300 mt-10">Loading catalog...</p>
+          <p className="text-center text-gray-600 dark:text-gray-300 mt-10">Loading services...</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
             {catalog.map((category) => (
               <div
                 key={category.id}
-                className="bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-xl shadow-xl"
+                className="rounded-3xl border border-white border-opacity-60 bg-white bg-opacity-60 shadow-lg backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60"
               >
                 <div className="p-5 space-y-4">
-                  <h2 className="text-2xl font-bold text-pink-700 dark:text-pink-300 border-b border-pink-200 pb-2">
+                  <h2 className="font-heading text-2xl font-bold text-indigo-600 dark:text-indigo-400 border-b border-gray-200 dark:border-gray-700 pb-2">
                     {category.name}
                   </h2>
 
                   {category.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md space-y-2"
+                      className="bg-white bg-opacity-70 dark:bg-gray-800 dark:bg-opacity-60 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-2"
                     >
                       <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                         {item.name}
