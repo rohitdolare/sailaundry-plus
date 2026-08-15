@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  getAllUsers,
+  getAllCustomers,
   updateUserVerified,
   getUserProfile,
   updateUserProfile,
@@ -23,8 +23,8 @@ const AdminCustomersPage = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const list = await getAllUsers();
-      setUsers(Array.isArray(list) ? list.filter((u) => u.role !== "admin") : []);
+      const list = await getAllCustomers();
+      setUsers(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load customers.");

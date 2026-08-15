@@ -7,6 +7,8 @@ import {
   collection,
   getDocs,
   addDoc,
+  query,
+  where,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -52,16 +54,28 @@ export const deleteLocation = async (uid, index) => {
   await updateDoc(userRef, { locations });
 };
 
-// 🔹 Get all users (admin only – for creating orders on behalf of customers)
-export const getAllUsers = async () => {
+// 🔹 Get only customer accounts (role !== "admin")
+export const getAllCustomers = async () => {
   try {
-    const snapshot = await getDocs(collection(db, "users"));
-    return snapshot.docs.map((d) => ({
-      uid: d.id,
-      ...d.data(),
-    }));
+    const snapshot = await getDocs(
+      query(collection(db, "users"), where("role", "!=", "admin"))
+    );
+    return snapshot.docs.map((d) => ({ uid: d.id, ...d.data() }));
   } catch (error) {
-    console.error("Error fetching users (check Firestore rules):", error);
+    console.error("Error fetching customers (check Firestore rules):", error);
+    return [];
+  }
+};
+
+// 🔹 Get only admin accounts
+export const getAllAdmins = async () => {
+  try {
+    const snapshot = await getDocs(
+      query(collection(db, "users"), where("role", "==", "admin"))
+    );
+    return snapshot.docs.map((d) => ({ uid: d.id, ...d.data() }));
+  } catch (error) {
+    console.error("Error fetching admins (check Firestore rules):", error);
     return [];
   }
 };

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserProfile, updateUserProfile } from "../../services/firestore/userService";
-import { Pencil, Save, X, User, Mail, Phone, Shield } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { Pencil, Save, X, User, Mail, Phone, Shield, KeyRound } from "lucide-react";
 
 const AdminProfilePage = () => {
   const { user } = useAuth();
@@ -9,6 +12,7 @@ const AdminProfilePage = () => {
   const [formData, setFormData] = useState({ name: "", mobile: "" });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
 
   useEffect(() => {
     if (user?.uid) {
@@ -34,6 +38,20 @@ const AdminProfilePage = () => {
       setEditMode(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!user?.email) return;
+    setSendingReset(true);
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      toast.success(`Password reset link sent to ${user.email}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send password reset email.");
+    } finally {
+      setSendingReset(false);
     }
   };
 
@@ -128,6 +146,25 @@ const AdminProfilePage = () => {
                 </label>
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{displayEmail}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Email is tied to your login and can't be changed here.</p>
+              </div>
+
+              <div className="sm:col-span-2 rounded-2xl bg-white bg-opacity-50 dark:bg-gray-800 dark:bg-opacity-50 border border-gray-100 dark:border-gray-700 dark:border-opacity-80 p-4">
+                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                  <KeyRound size={14} />
+                  Password
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                  Passwords are managed securely by Firebase Authentication and can't be viewed. To set a new one, send yourself a reset link.
+                </p>
+                <button
+                  type="button"
+                  onClick={handlePasswordReset}
+                  disabled={sendingReset}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 dark:hover:bg-opacity-50 transition disabled:opacity-60"
+                >
+                  <KeyRound size={16} />
+                  {sendingReset ? "Sending..." : "Send password reset email"}
+                </button>
               </div>
             </div>
 

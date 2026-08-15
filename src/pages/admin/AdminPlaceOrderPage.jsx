@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
-  getAllUsers,
+  getAllCustomers,
   getUserProfile,
   addOrder,
   updateOrder,
@@ -78,10 +78,10 @@ const AdminPlaceOrderPage = () => {
     const load = async () => {
       try {
         const [userList, catalogData] = await Promise.all([
-          getAllUsers(),
+          getAllCustomers(),
           getCatalog(),
         ]);
-        setUsers(Array.isArray(userList) ? userList.filter((u) => u.role !== "admin") : []);
+        setUsers(Array.isArray(userList) ? userList : []);
         setCatalog(Array.isArray(catalogData) ? catalogData : []);
       } catch (err) {
         console.error(err);

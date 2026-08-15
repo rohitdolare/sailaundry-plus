@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Package, Clock, Users, Calendar } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
-import { getAllUsers } from "../../services/firestore/userService";
+import { getAllCustomers } from "../../services/firestore/userService";
 
 const getOrderDate = (order) => {
   const t = order?.createdAt;
@@ -67,9 +67,8 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    getAllUsers().then((users) => {
-      const customersOnly = Array.isArray(users) ? users.filter((u) => u.role !== "admin") : [];
-      setCustomerCount(customersOnly.length);
+    getAllCustomers().then((customers) => {
+      setCustomerCount(Array.isArray(customers) ? customers.length : 0);
     });
   }, []);
 

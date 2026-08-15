@@ -55,7 +55,7 @@ const LoginPage = () => {
           uid: user.uid,
           name: profileData.name,
           mobile: profileData.mobile,
-          email: profileData.email,
+          email: user.email,
           role,
           createdAt: profileData.createdAt,
           expiresAt,
