@@ -147,7 +147,7 @@ const PlaceOrderPage = () => {
   };
 
   return (
-    <div className="relative px-4 py-8">
+    <div className="relative px-4 py-4 sm:py-6">
       <PageHeader title="New Order" />
 
       <form

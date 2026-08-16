@@ -28,7 +28,7 @@ const HomePage = () => {
   }).length;
 
   return (
-    <div className="relative mx-auto max-w-5xl space-y-8 px-4 py-8">
+    <div className="relative mx-auto max-w-5xl space-y-8 px-4 py-4 sm:py-6">
       <HeroSection userName={userName} />
       <StatsSection ongoing={ongoing} upcoming={upcoming} thisWeek={thisWeek} />
       <QuickActions />

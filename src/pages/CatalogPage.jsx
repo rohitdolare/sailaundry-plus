@@ -22,7 +22,7 @@ const CatalogPage = () => {
   }, []);
 
   return (
-    <div className="px-4 py-10">
+    <div className="px-4 py-4 sm:py-6">
       <div className="max-w-6xl mx-auto">
         <PageHeader title="Services" />
 

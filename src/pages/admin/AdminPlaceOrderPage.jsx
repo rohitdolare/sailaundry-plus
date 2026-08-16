@@ -311,7 +311,7 @@ const AdminPlaceOrderPage = () => {
 
   return (
     <div className="w-full transition-colors duration-300">
-      <div className="px-4 py-8 max-w-3xl mx-auto">
+      <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
         <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           {isEditMode ? "Edit Order" : "New Order"}
         </h1>
@@ -321,7 +321,7 @@ const AdminPlaceOrderPage = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg p-8"
+          className="space-y-6 rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg p-8 max-w-3xl"
         >
           {/* Single customer input: search by name/mobile or type new customer name */}
           <div className="space-y-4">

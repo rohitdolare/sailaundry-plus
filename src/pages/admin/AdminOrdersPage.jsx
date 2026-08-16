@@ -248,7 +248,7 @@ const AdminOrdersPage = () => {
 
   return (
     <div className="w-full transition-colors duration-300">
-      <div className="px-3 py-3 max-w-6xl mx-auto pb-20">
+      <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
         {/* Top section: title + search/filter — stacked on mobile for cleaner layout */}
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-start justify-between gap-2">

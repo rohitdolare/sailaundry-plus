@@ -61,9 +61,6 @@ const MainLayout = () => {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
-      {/* Decorative background (fixed, sits behind all glass surfaces) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gray-50 dark:bg-gray-950" />
-
       {/* Header */}
       <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-blueGray-800 px-4 py-3 shadow-md">
         <h2 className="font-heading text-lg font-bold tracking-tight truncate text-white">
@@ -93,7 +90,7 @@ const MainLayout = () => {
       )}
 
       {/* Icon rail (desktop quick access) */}
-      <aside className="hidden md:flex fixed left-0 top-14 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-blueGray-800">
+      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-blueGray-800">
         <button
           onClick={() => setIsSidebarOpen(true)}
           title="Expand sidebar"
@@ -187,8 +184,8 @@ const MainLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content - pt-14 for fixed header, pb-20 on mobile for bottom bar */}
-      <main className="flex-1 overflow-auto pt-14 pb-20 md:pb-0 md:ml-16 transition-colors duration-300">
+      {/* Main Content - pt-16 for fixed header, pb-20 on mobile for bottom bar */}
+      <main className="flex-1 overflow-auto pt-16 pb-20 md:pb-0 md:ml-16 transition-colors duration-300">
         <Outlet />
       </main>
 
