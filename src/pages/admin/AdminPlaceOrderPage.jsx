@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   ArrowRight,
   User,
+  Search,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
@@ -67,9 +68,8 @@ const AdminPlaceOrderPage = () => {
   });
 
   const [catalog, setCatalog] = useState([]);
-  const [items, setItems] = useState([
-    { section: "", item: "", service: "", quantity: 1, price: 0 },
-  ]);
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -203,18 +203,25 @@ const AdminPlaceOrderPage = () => {
 
   const handleItemChange = (index, field, value) => {
     const updated = [...items];
-    updated[index][field] = value;
-    if (field === "service" || field === "item" || field === "section") {
-      const section = catalog.find((s) => s.name === updated[index].section);
-      const item = section?.items?.find((i) => i.name === updated[index].item);
-      const service = item?.services?.find((s) => s.type === updated[index].service);
-      updated[index].price = service?.price || 0;
-    }
+    updated[index] = { ...updated[index], [field]: value };
     setItems(updated);
   };
 
-  const handleAddItem = () => {
-    setItems([...items, { section: "", item: "", service: "", quantity: 1, price: 0 }]);
+  const handleQuickAdd = (sectionName, itemName, service) => {
+    setItems((prev) => {
+      const idx = prev.findIndex(
+        (i) => i.section === sectionName && i.item === itemName && i.service === service.type
+      );
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], quantity: (updated[idx].quantity || 1) + 1 };
+        return updated;
+      }
+      return [
+        ...prev,
+        { section: sectionName, item: itemName, service: service.type, quantity: 1, price: service.price || 0 },
+      ];
+    });
   };
 
   const handleRemoveItem = (index) => {
@@ -245,8 +252,8 @@ const AdminPlaceOrderPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (items.some((i) => !i.section || !i.item || !i.service)) {
-      toast.error("Please fill all item details.");
+    if (items.length === 0) {
+      toast.error("Please add at least one item.");
       return;
     }
 
@@ -295,7 +302,7 @@ const AdminPlaceOrderPage = () => {
         toast.success("Order created successfully.");
         const { pickupDate, pickupTime } = getDefaultPickupDateTime();
         setFormData({ pickupDate, pickupTime, instructions: "" });
-        setItems([{ section: "", item: "", service: "", quantity: 1, price: 0 }]);
+        setItems([]);
         setCustomerName("");
         setCustomerMobile("");
         setCustomerAddress("");
@@ -494,79 +501,127 @@ const AdminPlaceOrderPage = () => {
               <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
               <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">Order items</h3>
             </div>
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 gap-3 sm:grid-cols-5 items-end bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
-              >
-                <select
-                  value={item.section}
-                  onChange={(e) => handleItemChange(index, "section", e.target.value)}
-                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
-                >
-                  <option value="">Section</option>
-                  {catalog.map((s) => (
-                    <option key={s.name} value={s.name}>{s.name}</option>
-                  ))}
-                </select>
-                <select
-                  value={item.item}
-                  onChange={(e) => handleItemChange(index, "item", e.target.value)}
-                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
-                >
-                  <option value="">Item</option>
-                  {catalog.find((s) => s.name === item.section)?.items?.map((it) => (
-                    <option key={it.name} value={it.name}>{it.name}</option>
-                  ))}
-                </select>
-                <select
-                  value={item.service}
-                  onChange={(e) => handleItemChange(index, "service", e.target.value)}
-                  className="rounded-xl bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 text-sm focus:border-indigo-500"
-                >
-                  <option value="">Service</option>
-                  {catalog.find((s) => s.name === item.section)?.items?.find((i) => i.name === item.item)?.services?.map((srv) => (
-                    <option key={srv.type} value={srv.type}>{srv.type} (₹{srv.price})</option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-0.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => handleItemChange(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
-                    disabled={(item.quantity || 1) <= 1}
-                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:pointer-events-none transition"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="min-w-[1.75rem] text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {item.quantity || 1}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleItemChange(index, "quantity", (item.quantity || 1) + 1)}
-                    className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItem(index)}
-                  className="rounded-xl border border-red-200 bg-white text-red-600 p-2 flex items-center justify-center transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
-                >
-                  <Trash2 size={18} />
-                </button>
+
+            {/* Catalog quick-add picker */}
+            <div className="space-y-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={catalogSearch}
+                  onChange={(e) => setCatalogSearch(e.target.value)}
+                  placeholder="Search items to add..."
+                  className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+                />
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={handleAddItem}
-              className="w-full py-3 rounded-2xl border border-dashed border-indigo-300 dark:border-indigo-400 dark:border-opacity-50 text-indigo-600 dark:text-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-20 transition flex items-center justify-center gap-2"
-            >
-              <Plus size={18} /> Add item
-            </button>
+              <div className="max-h-72 overflow-y-auto space-y-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 p-4">
+                {(() => {
+                  const q = catalogSearch.trim().toLowerCase();
+                  const filteredCatalog = catalog
+                    .map((section) => ({
+                      ...section,
+                      items: section.items?.filter((it) => !q || it.name.toLowerCase().includes(q)) || [],
+                    }))
+                    .filter((section) => section.items.length > 0);
+                  if (filteredCatalog.length === 0) {
+                    return (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        {catalog.length === 0 ? "Loading catalog..." : "No items match your search"}
+                      </p>
+                    );
+                  }
+                  return filteredCatalog.map((section) => (
+                    <div key={section.name} className="space-y-2">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        {section.name}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {section.items.map((it) =>
+                          it.services?.map((srv) => {
+                            const existing = items.find(
+                              (i) => i.section === section.name && i.item === it.name && i.service === srv.type
+                            );
+                            return (
+                              <button
+                                key={`${it.name}-${srv.type}`}
+                                type="button"
+                                onClick={() => handleQuickAdd(section.name, it.name, srv)}
+                                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                                  existing
+                                    ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900 dark:bg-opacity-30 dark:text-indigo-300"
+                                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:border-indigo-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                }`}
+                              >
+                                <Plus size={14} />
+                                {it.name} · {srv.type}
+                                <span className="text-gray-400 dark:text-gray-500">₹{srv.price}</span>
+                                {existing && (
+                                  <span className="ml-0.5 flex items-center justify-center min-w-[1.1rem] h-[1.1rem] rounded-full bg-indigo-600 text-white text-[10px] font-bold px-1">
+                                    {existing.quantity}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+
+            {/* Added items */}
+            <div className="space-y-3">
+              {items.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-3">
+                  No items added yet — tap items above to add them
+                </p>
+              ) : (
+                items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
+                  >
+                    <div className="flex-1 min-w-[10rem]">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.item}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.section} · {item.service} · ₹{item.price} each
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-0.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => handleItemChange(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
+                        disabled={(item.quantity || 1) <= 1}
+                        className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:pointer-events-none transition"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span className="min-w-[1.75rem] text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {item.quantity || 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleItemChange(index, "quantity", (item.quantity || 1) + 1)}
+                        className="p-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(index)}
+                      className="rounded-xl border border-red-200 bg-white text-red-600 p-2 flex items-center justify-center transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* Instructions */}
