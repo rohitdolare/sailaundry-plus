@@ -25,7 +25,7 @@ import { subscribeToAllOrders } from "../../services/firestore/orderService";
 import { getAllCustomers } from "../../services/firestore/userService";
 import StatCard from "../../components/admin/StatCard";
 import PeakHoursHeatmap from "../../components/admin/PeakHoursHeatmap";
-import { getOrderDate, getDayKey, getMonthKey, MONTH_NAMES, DAY_NAMES } from "../../utils/date";
+import { getOrderDate, getDayKey, getMonthKey, MONTH_NAMES } from "../../utils/date";
 import { formatCurrency } from "../../utils/format";
 
 const RANGE_OPTIONS = [
@@ -41,12 +41,6 @@ const STATUS_STYLES = {
   "Pending Pickup": { bar: "bg-amber-500", text: "text-amber-600 dark:text-amber-400" },
   "In Progress": { bar: "bg-teal-600", text: "text-teal-700 dark:text-teal-400" },
   Completed: { bar: "bg-green-600", text: "text-green-600 dark:text-green-400" },
-};
-
-const formatHour = (h) => {
-  const period = h < 12 ? "AM" : "PM";
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return `${hour12} ${period}`;
 };
 
 const isValidDate = (d) => d instanceof Date && !isNaN(d.getTime());
@@ -263,16 +257,6 @@ const AdminAnalyticsPage = () => {
     return grid;
   }, [orders]);
 
-  const busiestSlot = useMemo(() => {
-    let best = null;
-    heatmapData.forEach((row, dow) =>
-      row.forEach((count, hour) => {
-        if (!best || count > best.count) best = { dow, hour, count };
-      })
-    );
-    return best && best.count > 0 ? best : null;
-  }, [heatmapData]);
-
   // New-vs-returning + repeat rate use full lifetime order history to decide
   // who's "new", regardless of range — only the per-bucket counts respect range.
   const customerInsights = useMemo(() => {
@@ -420,17 +404,10 @@ const AdminAnalyticsPage = () => {
         {/* Peak hours heatmap — the headline ask, always all-time */}
         <SectionCard
           title="Peak order times"
-          caption={
-            busiestSlot
-              ? `All time · Busiest: ${DAY_NAMES[busiestSlot.dow]} ${formatHour(busiestSlot.hour)} · ${busiestSlot.count} orders`
-              : "All time"
-          }
+          caption="All time · when customers actually place orders, by hour and day"
           icon={Clock}
         >
           <PeakHoursHeatmap data={heatmapData} loading={loading} />
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Darker cells = more orders placed in that hour. Use this to plan staffing and support hours.
-          </p>
         </SectionCard>
 
         {/* Revenue & order volume trend */}

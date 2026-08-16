@@ -26,3 +26,9 @@ export const pctChange = (cur, prev) => (prev ? ((cur - prev) / prev) * 100 : nu
 
 export const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export const formatHour = (h) => {
+  const period = h < 12 ? "AM" : "PM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12} ${period}`;
+};
