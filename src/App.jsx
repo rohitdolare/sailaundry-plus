@@ -20,6 +20,7 @@ import AdminPlaceOrderPage from "./pages/admin/AdminPlaceOrderPage";
 import AdminCatalogPage from "./pages/admin/AdminCatalogPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import AdminLeaderboardPage from "./pages/admin/AdminLeaderboardPage";
+import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
 
 // Route Guards
@@ -56,6 +57,7 @@ function App() {
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />
           <Route path="leaderboard" element={<AdminLeaderboardPage />} />
+          <Route path="analytics" element={<AdminAnalyticsPage />} />
           <Route path="profile" element={<AdminProfilePage />} />
         </Route>
 

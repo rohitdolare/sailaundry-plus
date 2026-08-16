@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
+  BarChart3,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -49,6 +50,7 @@ export default function AdminLayout() {
     { path: "/admin/catalog", label: "Services", icon: <Tags size={18} />, exact: true },
     { path: "/admin/customers", label: "Customers", icon: <Users size={18} />, exact: true },
     { path: "/admin/leaderboard", label: "Leaderboard", icon: <Trophy size={18} />, exact: true },
+    { path: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={18} />, exact: true },
     { path: "/admin/profile", label: "Profile", icon: <User size={18} />, exact: true },
   ];
 

@@ -1,37 +1,19 @@
 import { useEffect, useState, useMemo } from "react";
-import { Package, Clock, Users, Calendar, IndianRupee, TrendingUp, TrendingDown } from "lucide-react";
+import { Package, Clock, Users, Calendar, IndianRupee } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
 import { getAllCustomers } from "../../services/firestore/userService";
-
-const getOrderDate = (order) => {
-  const t = order?.createdAt;
-  if (!t) return null;
-  return t?.toDate ? t.toDate() : new Date(t);
-};
-
-const isSameDay = (d1, d2) =>
-  d1 &&
-  d2 &&
-  d1.getFullYear() === d2.getFullYear() &&
-  d1.getMonth() === d2.getMonth() &&
-  d1.getDate() === d2.getDate();
-
-const isSameMonth = (d1, d2) =>
-  d1 &&
-  d2 &&
-  d1.getFullYear() === d2.getFullYear() &&
-  d1.getMonth() === d2.getMonth();
-
-const getMonthKey = (date) =>
-  date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` : "";
-
-const getDayKey = (date) =>
-  date ? date.toISOString().slice(0, 10) : "";
-
-const pctChange = (cur, prev) => (prev ? ((cur - prev) / prev) * 100 : null);
-
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+import StatCard from "../../components/admin/StatCard";
+import { formatCurrency } from "../../utils/format";
+import {
+  getOrderDate,
+  isSameDay,
+  isSameMonth,
+  getMonthKey,
+  getDayKey,
+  pctChange,
+  MONTH_NAMES,
+  DAY_NAMES,
+} from "../../utils/date";
 
 const PERIOD = { TODAY: "today", DAY: "day", THIS_MONTH: "this_month", MONTH: "month" };
 
@@ -43,57 +25,6 @@ const HERO_IMAGES = [
 ];
 
 const CAROUSEL_INTERVAL_MS = 4500;
-
-const StatCard = (props) => {
-  const { icon: Icon, iconBg, iconClass, label, value, trend, trendLabel, featured, loading } = props;
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 animate-pulse">
-        <div className="h-9 w-9 rounded-lg bg-gray-200 dark:bg-gray-800 mb-4" />
-        <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-800 mb-2" />
-        <div className="h-7 w-14 rounded bg-gray-200 dark:bg-gray-800" />
-      </div>
-    );
-  }
-  return (
-    <div
-      className={`rounded-2xl border p-5 flex flex-col gap-3 ${
-        featured
-          ? "border-indigo-200 dark:border-indigo-900 bg-indigo-50/60 dark:bg-indigo-950/30"
-          : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconBg}`}>
-          <Icon size={18} className={iconClass} />
-        </span>
-        {trend != null && (
-          <span
-            className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${
-              trend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-            }`}
-          >
-            {trend >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-            {Math.abs(trend).toFixed(0)}%
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">{label}</p>
-        <p
-          className={`font-heading font-bold tabular-nums text-gray-900 dark:text-gray-100 ${
-            featured ? "text-3xl sm:text-4xl" : "text-2xl"
-          }`}
-        >
-          {value}
-        </p>
-        {trendLabel && trend != null && (
-          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{trendLabel}</p>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -382,7 +313,7 @@ const AdminDashboard = () => {
               iconBg="bg-indigo-100 dark:bg-indigo-900/40"
               iconClass="text-indigo-600 dark:text-indigo-400"
               label={`Revenue · ${periodLabel}`}
-              value={`₹${revenue.toLocaleString("en-IN")}`}
+              value={formatCurrency(revenue)}
               trend={trend.revenue}
               trendLabel={trend.label}
               featured
@@ -467,7 +398,7 @@ const AdminDashboard = () => {
                           : "bg-indigo-200 dark:bg-indigo-900 group-hover:bg-indigo-300 dark:group-hover:bg-indigo-800"
                       }`}
                       style={{ height: `${heightPct}%` }}
-                      title={`${revenueRange === "6months" ? row.label : row.shortLabel} · ₹${row.revenue.toLocaleString("en-IN")} · ${row.orders} orders`}
+                      title={`${revenueRange === "6months" ? row.label : row.shortLabel} · ${formatCurrency(row.revenue)} · ${row.orders} orders`}
                     />
                   </div>
                   <span
@@ -491,7 +422,7 @@ const AdminDashboard = () => {
                   <span className="flex items-center gap-4 tabular-nums">
                     <span className="text-gray-400 dark:text-gray-500">{row.orders} orders</span>
                     <span className="font-semibold text-gray-800 dark:text-gray-100 w-24 text-right">
-                      ₹{row.revenue.toLocaleString("en-IN")}
+                      {formatCurrency(row.revenue)}
                     </span>
                   </span>
                 </div>
@@ -502,7 +433,7 @@ const AdminDashboard = () => {
           <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 shrink-0 flex items-center justify-between">
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total</p>
             <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 tabular-nums">
-              ₹{activeRangeTotal.toLocaleString("en-IN")}
+              {formatCurrency(activeRangeTotal)}
             </p>
           </div>
         </section>

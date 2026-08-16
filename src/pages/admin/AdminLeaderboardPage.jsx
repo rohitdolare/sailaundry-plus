@@ -2,20 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Trophy, Package, IndianRupee, Medal, ChevronLeft, ChevronRight } from "lucide-react";
 import { subscribeToAllOrders } from "../../services/firestore/orderService";
 import { getAllCustomers } from "../../services/firestore/userService";
-
-const getOrderDate = (order) => {
-  const t = order?.createdAt;
-  if (!t) return null;
-  return t?.toDate ? t.toDate() : new Date(t);
-};
-
-const isSameMonth = (d1, d2) =>
-  d1 &&
-  d2 &&
-  d1.getFullYear() === d2.getFullYear() &&
-  d1.getMonth() === d2.getMonth();
-
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import { getOrderDate, isSameMonth, MONTH_NAMES } from "../../utils/date";
+import { formatCurrency } from "../../utils/format";
 
 const RANGE = { THIS_MONTH: "this_month", MONTH: "month", OVERALL: "overall" };
 const METRIC = { ORDERS: "orders", SPEND: "spend" };
@@ -264,7 +252,7 @@ const AdminLeaderboardPage = () => {
                       </td>
                       <td className="py-2 px-5 text-right tabular-nums text-gray-800 dark:text-gray-200">{row.orders}</td>
                       <td className="py-2 px-5 text-right tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
-                        ₹{row.spend.toLocaleString("en-IN")}
+                        {formatCurrency(row.spend)}
                       </td>
                     </tr>
                   ))
