@@ -22,6 +22,12 @@
         ],
         "createdAt": "2026-08-16T18:02:54.865Z",
         "reason": "false positive: base text-gray-400 sits on transparent/neutral bg; text flips to red-600 exactly when hover:bg-red-50 activates, so no gray-on-color combination is ever actually rendered"
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-08-16T19:45:14.936Z",
+        "reason": "pre-existing app-wide typeface (tailwind.config.cjs font-heading), not introduced by this change"
       }
     ]
   }
