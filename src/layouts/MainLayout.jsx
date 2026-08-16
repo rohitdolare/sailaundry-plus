@@ -62,7 +62,7 @@ const MainLayout = () => {
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
       {/* Header */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-blueGray-800 px-4 py-3 shadow-md">
+      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-indigo-900 px-4 py-3 shadow-md">
         <h2 className="font-heading text-lg font-bold tracking-tight truncate text-white">
           Sai Laundry+
         </h2>
@@ -90,7 +90,7 @@ const MainLayout = () => {
       )}
 
       {/* Icon rail (desktop quick access) */}
-      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-blueGray-800">
+      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-indigo-900">
         <button
           onClick={() => setIsSidebarOpen(true)}
           title="Expand sidebar"
@@ -108,7 +108,7 @@ const MainLayout = () => {
             aria-label={label}
             className={`flex h-11 w-11 items-center justify-center rounded-xl transition duration-200 ${
               activePath === path
-                ? "bg-teal-50 text-teal-600 dark:bg-teal-950 dark:text-teal-400"
+                ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400"
                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
             }`}
           >
@@ -129,10 +129,10 @@ const MainLayout = () => {
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-800 dark:bg-blueGray-800 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed left-0 top-0 z-30 h-screen w-64 flex flex-col transform border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-800 dark:bg-indigo-900 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Sidebar Header */}
-        <div className="sticky top-0 z-10 bg-blueGray-800 px-6 py-6 md:py-8 text-white shadow-md">
+        <div className="shrink-0 bg-indigo-900 px-6 py-6 md:py-8 text-white shadow-md">
           <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tight truncate">
             Sai Laundry+
           </h2>
@@ -140,7 +140,7 @@ const MainLayout = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1" role="navigation" aria-label="Main Navigation">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1" role="navigation" aria-label="Main Navigation">
           {navItems.map(({ path, label, icon }) => (
             <Link
               key={path}
@@ -148,11 +148,11 @@ const MainLayout = () => {
               onClick={() => setIsSidebarOpen(false)}
               className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200 ${
                 activePath === path
-                  ? "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-400"
+                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
-              <span className={`${activePath === path ? "text-teal-600 dark:text-teal-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"}`}>
+              <span className={`${activePath === path ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"}`}>
                 {icon}
               </span>
               <span>{label}</span>
@@ -161,10 +161,10 @@ const MainLayout = () => {
         </nav>
 
         {/* Divider */}
-        <div className="mx-4 h-px bg-gray-200 dark:bg-gray-700" />
+        <div className="shrink-0 mx-4 h-px bg-gray-200 dark:bg-gray-700" />
 
         {/* Logout Button */}
-        <div className="p-4">
+        <div className="shrink-0 p-4">
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-red-200 bg-white bg-opacity-60 text-red-600 font-semibold transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
@@ -175,7 +175,7 @@ const MainLayout = () => {
         </div>
 
         {/* Footer Info Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="shrink-0 p-4 pt-0">
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/50">
             <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 text-center">
               Simplify Your Laundry
@@ -203,7 +203,7 @@ const MainLayout = () => {
               to={path}
               className={`flex flex-col items-center justify-center flex-1 py-2 px-1 min-w-0 text-xs font-medium transition ${
                 isActive
-                  ? "text-teal-600 dark:text-teal-400"
+                  ? "text-indigo-600 dark:text-indigo-400"
                   : "text-gray-500 dark:text-gray-400"
               }`}
             >

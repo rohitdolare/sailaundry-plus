@@ -63,7 +63,7 @@ export default function AdminLayout() {
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
       {/* Header */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-blueGray-800 px-4 py-3 shadow-md">
+      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-indigo-900 px-4 py-3 shadow-md">
         <h2 className="font-heading text-white text-lg font-bold tracking-tight truncate flex items-center gap-2">
           <Shield size={18} /> Admin
         </h2>
@@ -82,7 +82,7 @@ export default function AdminLayout() {
       )}
 
       {/* Icon rail (desktop quick access) */}
-      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-blueGray-800">
+      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-indigo-900">
         <button
           onClick={() => setIsSidebarOpen(true)}
           title="Expand sidebar"
@@ -102,7 +102,7 @@ export default function AdminLayout() {
               aria-label={label}
               className={`flex h-11 w-11 items-center justify-center rounded-xl transition duration-200 ${
                 isActive
-                  ? "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400"
+                  ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400"
                   : "text-gray-400 dark:text-gray-500 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
               }`}
             >
@@ -124,9 +124,9 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-800 dark:bg-blueGray-800 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed left-0 top-0 z-30 h-screen w-64 flex flex-col transform border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-800 dark:bg-indigo-900 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="sticky top-0 z-10 bg-blueGray-800 px-6 py-6 md:py-8 text-white shadow-md">
+        <div className="shrink-0 bg-indigo-900 px-6 py-6 md:py-8 text-white shadow-md">
           <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tight truncate flex items-center gap-2">
             <Shield size={22} /> Admin
           </h2>
@@ -138,7 +138,7 @@ export default function AdminLayout() {
           )}
         </div>
 
-        <nav className="p-4 space-y-1" role="navigation" aria-label="Admin Navigation">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1" role="navigation" aria-label="Admin Navigation">
           {adminNavItems.map(({ path, label, icon, exact }) => {
             const isActive = exact ? activePath === path : activePath === path || activePath.startsWith(path + "/");
             return (
@@ -148,11 +148,11 @@ export default function AdminLayout() {
                 onClick={() => setIsSidebarOpen(false)}
                 className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200 ${
                   isActive
-                    ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
               >
-                <span className={isActive ? "text-amber-600 dark:text-amber-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"}>
+                <span className={isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"}>
                   {icon}
                 </span>
                 <span>{label}</span>
@@ -161,9 +161,9 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        <div className="mx-4 h-px bg-gray-200 dark:bg-gray-700" />
+        <div className="shrink-0 mx-4 h-px bg-gray-200 dark:bg-gray-700" />
 
-        <div className="p-4 space-y-2">
+        <div className="shrink-0 p-4 space-y-2">
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-red-200 bg-white bg-opacity-60 text-red-600 font-semibold transition duration-200 hover:bg-red-600 hover:text-white hover:border-red-600 dark:border-red-900 dark:bg-transparent"
@@ -192,7 +192,7 @@ export default function AdminLayout() {
               to={path}
               className={`flex flex-col items-center justify-center flex-1 py-2 px-1 min-w-0 text-xs font-medium transition ${
                 isActive
-                  ? "text-amber-600 dark:text-amber-400"
+                  ? "text-indigo-600 dark:text-indigo-400"
                   : "text-gray-500 dark:text-gray-400"
               }`}
             >
