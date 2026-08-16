@@ -5,8 +5,10 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PanelLeftOpen,
   Shield,
   Tags,
+  Trophy,
   User,
   Users,
   Package,
@@ -46,6 +48,7 @@ export default function AdminLayout() {
     { path: "/admin/create-order", label: "New Order", icon: <ShoppingCart size={18} />, exact: false },
     { path: "/admin/catalog", label: "Services", icon: <Tags size={18} />, exact: true },
     { path: "/admin/customers", label: "Customers", icon: <Users size={18} />, exact: true },
+    { path: "/admin/leaderboard", label: "Leaderboard", icon: <Trophy size={18} />, exact: true },
     { path: "/admin/profile", label: "Profile", icon: <User size={18} />, exact: true },
   ];
 
@@ -59,40 +62,82 @@ export default function AdminLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
-      {/* Decorative background mesh (fixed, sits behind all glass surfaces) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
-        <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-indigo-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
-      </div>
+      {/* Decorative background (fixed, sits behind all glass surfaces) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gray-50 dark:bg-gray-950" />
 
-      {/* Mobile Header */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between border-b border-white border-opacity-60 bg-white bg-opacity-70 px-3 py-3 backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-70 md:hidden">
-        <h2 className="font-heading text-indigo-600 dark:text-indigo-400 text-base font-bold truncate flex items-center gap-2">
+      {/* Header */}
+      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-blueGray-800 px-4 py-3 shadow-md">
+        <h2 className="font-heading text-white text-lg font-bold tracking-tight truncate flex items-center gap-2">
           <Shield size={18} /> Admin
         </h2>
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          aria-label="Open Menu"
-          className="flex h-11 w-11 items-center justify-center"
+          aria-label="Toggle Menu"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-white transition duration-200 hover:bg-white/10 active:bg-white/15 active:scale-95"
         >
-          <Menu size={24} className="text-indigo-600 dark:text-indigo-300" />
+          <Menu size={22} />
         </button>
       </header>
+
+      {/* Backdrop */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-20 bg-black/40 transition-opacity duration-300" />
+      )}
+
+      {/* Icon rail (desktop quick access) */}
+      <aside className="hidden md:flex fixed left-0 top-14 bottom-0 z-10 w-16 flex-col items-center gap-1 overflow-y-auto border-r border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-blueGray-800">
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          title="Expand sidebar"
+          aria-label="Expand sidebar"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-400 transition duration-200 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+        >
+          <PanelLeftOpen size={19} />
+        </button>
+        <div className="mx-2 mb-1 h-px w-8 bg-gray-200 dark:bg-gray-700" />
+        {adminNavItems.map(({ path, label, icon, exact }) => {
+          const isActive = exact ? activePath === path : activePath === path || activePath.startsWith(path + "/");
+          return (
+            <Link
+              key={path}
+              to={path}
+              title={label}
+              aria-label={label}
+              className={`flex h-11 w-11 items-center justify-center rounded-xl transition duration-200 ${
+                isActive
+                  ? "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400"
+                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+              }`}
+            >
+              {icon}
+            </Link>
+          );
+        })}
+        <div className="flex-1" />
+        <button
+          onClick={handleLogout}
+          title="Logout"
+          aria-label="Logout"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 transition duration-200 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+        >
+          <LogOut size={18} />
+        </button>
+      </aside>
 
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto border-r border-white border-opacity-60 bg-white bg-opacity-60 shadow-xl backdrop-blur-xl backdrop-filter transition-transform duration-300 dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:static md:block md:translate-x-0`}
+        className={`fixed left-0 top-0 z-30 min-h-screen w-64 transform overflow-y-auto border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-800 dark:bg-blueGray-800 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-6 md:py-8 text-white">
+        <div className="sticky top-0 z-10 bg-blueGray-800 px-6 py-6 md:py-8 text-white shadow-md">
           <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tight truncate flex items-center gap-2">
             <Shield size={22} /> Admin
           </h2>
-          <p className="text-xs md:text-sm text-white text-opacity-80 mt-1">
+          <p className="text-xs md:text-sm text-gray-400 mt-1">
             Sai Laundry+ Admin Panel
           </p>
           {user?.name && (
-            <p className="text-xs text-white text-opacity-60 mt-2 truncate">{user.name}</p>
+            <p className="text-xs text-gray-400 mt-2 truncate">{user.name}</p>
           )}
         </div>
 
@@ -104,13 +149,15 @@ export default function AdminLayout() {
                 key={path}
                 to={path}
                 onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition duration-200 ${
+                className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-white hover:bg-opacity-60 dark:hover:bg-gray-800 dark:hover:bg-opacity-60"
+                    ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
               >
-                {icon}
+                <span className={isActive ? "text-amber-600 dark:text-amber-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"}>
+                  {icon}
+                </span>
                 <span>{label}</span>
               </Link>
             );
@@ -130,13 +177,13 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0 transition-colors duration-300">
+      <main className="flex-1 overflow-auto pt-14 pb-20 md:pb-0 md:ml-16 transition-colors duration-300">
         <Outlet />
       </main>
 
       {/* Mobile Bottom Bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-white border-opacity-60 bg-white bg-opacity-70 backdrop-blur-xl backdrop-filter dark:border-gray-800 dark:border-opacity-60 dark:bg-gray-900 dark:bg-opacity-70 pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 pb-[env(safe-area-inset-bottom)] md:hidden"
         role="navigation"
         aria-label="Admin navigation"
       >
@@ -148,7 +195,7 @@ export default function AdminLayout() {
               to={path}
               className={`flex flex-col items-center justify-center flex-1 py-2 px-1 min-w-0 text-xs font-medium transition ${
                 isActive
-                  ? "text-indigo-600 dark:text-indigo-400"
+                  ? "text-amber-600 dark:text-amber-400"
                   : "text-gray-500 dark:text-gray-400"
               }`}
             >

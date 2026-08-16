@@ -7,7 +7,27 @@ import {
   deleteUserProfile,
 } from "../../services/firestore";
 import { toast } from "react-hot-toast";
-import { Users, Loader2, MapPin, Plus, Trash2, X, Phone } from "lucide-react";
+import {
+  Users,
+  Loader2,
+  MapPin,
+  Plus,
+  Trash2,
+  X,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Search,
+} from "lucide-react";
+
+const PAGE_SIZE = 20;
+
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase() || "").join("") || "?";
+};
 
 const AdminCustomersPage = () => {
   const [users, setUsers] = useState([]);
@@ -19,6 +39,7 @@ const AdminCustomersPage = () => {
   const [editSaving, setEditSaving] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [deletingUid, setDeletingUid] = useState(null);
+  const [page, setPage] = useState(1);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -190,6 +211,10 @@ const AdminCustomersPage = () => {
         customerToSearchText(u).includes(searchQuery.trim().toLowerCase())
       );
 
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
   // Onboarding date from user (createdAt)
   const getOnboardingDate = (u) => {
     const ts = u.createdAt?.toDate?.() || (u.createdAt ? new Date(u.createdAt) : null);
@@ -201,23 +226,11 @@ const AdminCustomersPage = () => {
     return ts.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   };
 
-  // Group by onboarding date, recent first; within each group, recent first
-  const sortedForGrouping = [...filteredUsers].sort((a, b) => getOnboardingDate(b) - getOnboardingDate(a));
-  const groupedByDate = sortedForGrouping.reduce((acc, u) => {
-    const key = getOnboardingDateKey(u);
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(u);
-    return acc;
-  }, {});
-  const orderedGroupKeys = Object.keys(groupedByDate).sort((a, b) => {
-    if (a === "Unknown date") return 1;
-    if (b === "Unknown date") return -1;
-    const usersA = groupedByDate[a];
-    const usersB = groupedByDate[b];
-    const dateA = getOnboardingDate(usersA[0]);
-    const dateB = getOnboardingDate(usersB[0]);
-    return dateB - dateA;
-  });
+  // Recent onboarding first, paginated
+  const sortedUsers = [...filteredUsers].sort((a, b) => getOnboardingDate(b) - getOnboardingDate(a));
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / PAGE_SIZE));
+  const pageStart = (page - 1) * PAGE_SIZE;
+  const pagedUsers = sortedUsers.slice(pageStart, pageStart + PAGE_SIZE);
 
   if (loading) {
     return (
@@ -228,46 +241,14 @@ const AdminCustomersPage = () => {
   }
 
   return (
-    <div className="min-h-screen text-gray-900 dark:text-gray-100 pb-20 md:pb-0">
-      <div className="max-w-3xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2">
-            <Users size={20} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <h1 className="font-heading text-base font-semibold text-gray-700 dark:text-gray-300">Customers</h1>
-          </div>
-          {users.length > 0 && (
-            <div
-              className="flex items-center justify-center min-w-[3rem] h-9 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-heading font-bold text-lg tabular-nums shadow-lg"
-              aria-label="Total customers"
-            >
-              {searchQuery.trim() ? `${filteredUsers.length}/${users.length}` : users.length}
-            </div>
-          )}
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Verified customers can sign in. Toggle to verify a customer.
-        </p>
-
-        <div className="relative mb-6">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email, mobile, or address"
-            className="w-full h-10 pl-3 pr-9 rounded-xl border border-white border-opacity-60 dark:border-gray-700 dark:border-opacity-60 bg-white bg-opacity-60 dark:bg-gray-800 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter text-gray-900 dark:text-gray-100 text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-            aria-label="Search customers"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-600"
-              aria-label="Clear search"
-            >
-              ×
-            </button>
-          )}
-        </div>
+    <div className="w-full transition-colors overflow-auto flex flex-col">
+      <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-4 lg:gap-6">
+        <header className="shrink-0 flex items-center gap-2">
+          <Users size={22} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <h1 className="font-heading text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+            Customers
+          </h1>
+        </header>
 
         {users.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50 p-12 text-center">
@@ -275,96 +256,183 @@ const AdminCustomersPage = () => {
             <p className="text-gray-500 dark:text-gray-400">No customers yet.</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {searchQuery.trim() && filteredUsers.length === 0 && (
-              <p className="text-center text-gray-500 dark:text-gray-400 py-6 text-sm">
-                No customers match &quot;{searchQuery.trim()}&quot;.
+          <section className="rounded-3xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 shadow-lg overflow-hidden min-h-0 flex flex-col flex-1">
+            {/* Toolbar */}
+            <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80 flex flex-wrap items-center justify-between gap-3 bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30 shrink-0">
+              <div className="relative w-full sm:w-72">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search name, mobile, email, address"
+                  className="w-full h-9 pl-9 pr-8 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  aria-label="Search customers"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-700"
+                    aria-label="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                {searchQuery.trim() ? `${filteredUsers.length} of ${users.length}` : users.length} customers
               </p>
-            )}
-            {orderedGroupKeys.map((dateKey) => (
-              <section key={dateKey} className="space-y-2">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 sticky top-0 bg-white bg-opacity-90 dark:bg-gray-900 dark:bg-opacity-90 backdrop-blur-xl backdrop-filter py-1 z-10 rounded-lg px-1">
-                  {dateKey}
-                  <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">
-                    ({groupedByDate[dateKey].length})
-                  </span>
-                </h2>
-                <div className="space-y-2">
-                  {groupedByDate[dateKey].map((u) => (
-                    <div
-                      key={u.uid}
-                      className={`relative overflow-hidden rounded-2xl border bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter transition hover:bg-opacity-80 dark:hover:bg-opacity-80 ${
-                        u.verified === true
-                          ? "border-l-2 border-l-green-500 border-gray-200 border-opacity-60 dark:border-gray-800 dark:border-opacity-60"
-                          : "border-l-2 border-l-amber-500 border-gray-200 border-opacity-60 dark:border-gray-800 dark:border-opacity-60"
-                      }`}
-                    >
-                      <div className="px-3 py-2 flex items-center gap-3 min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(u)}
-                          className="min-w-0 flex-1 text-left rounded-xl -m-1 p-1 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-50 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-30 focus:ring-inset"
-                        >
-                          <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
-                            {u.name || "—"}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 flex items-center gap-2">
-                            <span className="truncate">{u.email || u.mobile || "No contact"}</span>
-                            {u.isWalkIn && (
-                              <span className="text-[8px] px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0 font-medium">
-                                Walk-in
+            </div>
+
+            <div className="overflow-x-auto min-h-0 flex-1">
+              <table className="w-full text-sm min-w-[720px]">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80">
+                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400 w-10">#</th>
+                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Customer</th>
+                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Contact</th>
+                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Joined</th>
+                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Status</th>
+                    <th className="py-2 px-5"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 px-5 text-center text-gray-500 dark:text-gray-400">
+                        No customers match &quot;{searchQuery.trim()}&quot;.
+                      </td>
+                    </tr>
+                  ) : (
+                    pagedUsers.map((u, i) => (
+                      <tr
+                        key={u.uid}
+                        className="border-b border-gray-50 dark:border-gray-800 dark:border-opacity-50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-40 transition"
+                      >
+                        <td className="py-2.5 px-5 font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+                          {pageStart + i + 1}
+                        </td>
+                        <td className="py-2.5 px-5">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(u)}
+                            className="flex items-center gap-3 text-left group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+                          >
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-600 dark:text-indigo-400 font-semibold text-xs shrink-0">
+                              {getInitials(u.name)}
+                            </span>
+                            <span className="min-w-0 flex items-center gap-2">
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                                {u.name || "—"}
                               </span>
+                              {u.isWalkIn && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0 font-medium">
+                                  Walk-in
+                                </span>
+                              )}
+                            </span>
+                          </button>
+                        </td>
+                        <td className="py-2.5 px-5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-gray-700 dark:text-gray-300 truncate">
+                              {u.mobile || u.email || "—"}
+                            </span>
+                            {(u.mobile || u.phone) && (
+                              <a
+                                href={`tel:${(u.mobile || u.phone || "").replace(/\D/g, "")}`}
+                                className="flex items-center justify-center w-7 h-7 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-30 transition shrink-0"
+                                aria-label={`Call ${u.name || "customer"}`}
+                              >
+                                <Phone size={14} />
+                              </a>
                             )}
-                          </p>
-                        </button>
-                        <div
-                          className="shrink-0 flex items-center gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                          role="group"
-                          aria-label={u.verified === true ? "Verified – click to unverify" : "Pending – click to verify"}
-                        >
-                          {(u.mobile || u.phone) && (
-                            <a
-                              href={`tel:${(u.mobile || u.phone || "").replace(/\D/g, "")}`}
-                              className="flex items-center justify-center w-9 h-9 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-30 transition"
-                              aria-label={`Call ${u.name || "customer"}`}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Phone size={18} />
-                            </a>
-                          )}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {getOnboardingDateKey(u)}
+                        </td>
+                        <td className="py-2.5 px-5">
                           <button
                             type="button"
                             role="switch"
                             aria-checked={u.verified === true}
                             disabled={updatingUid === u.uid}
                             onClick={() => handleToggleVerified(u)}
-                            className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              u.verified === true ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
-                            }`}
+                            aria-label={u.verified === true ? "Verified – click to unverify" : "Pending – click to verify"}
+                            className="flex items-center gap-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
                           >
-                            <span className="sr-only">
-                              {u.verified === true ? "Verified" : "Pending verification"}
+                            <span
+                              className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
+                                u.verified === true ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none absolute top-0.5 left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                                  u.verified === true ? "translate-x-4" : "translate-x-0"
+                                }`}
+                              />
+                              {updatingUid === u.uid && (
+                                <span className="absolute inset-0 flex items-center justify-center">
+                                  <Loader2 size={10} className="animate-spin text-white" />
+                                </span>
+                              )}
                             </span>
                             <span
-                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition ${
-                                u.verified === true ? "translate-x-4" : "translate-x-0.5"
+                              className={`text-xs font-medium ${
+                                u.verified === true
+                                  ? "text-green-600 dark:text-green-400"
+                                  : "text-amber-600 dark:text-amber-400"
                               }`}
-                            />
-                            {updatingUid === u.uid && (
-                              <span className="absolute inset-0 flex items-center justify-center">
-                                <Loader2 size={14} className="animate-spin text-white" />
-                              </span>
-                            )}
+                            >
+                              {u.verified === true ? "Verified" : "Pending"}
+                            </span>
                           </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                        </td>
+                        <td className="py-2.5 px-5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(u)}
+                            aria-label={`Edit ${u.name || "customer"}`}
+                            className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-900 dark:hover:bg-opacity-30 transition"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 dark:border-opacity-80 flex items-center justify-between gap-3 bg-white bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30 shrink-0">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft size={16} /> Prev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all"
+                  >
+                    Next <ChevronRight size={16} />
+                  </button>
                 </div>
-              </section>
-            ))}
-          </div>
+              </div>
+            )}
+          </section>
         )}
 
         {/* Edit Customer Modal */}

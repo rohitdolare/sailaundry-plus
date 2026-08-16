@@ -4,6 +4,16 @@
       "ai-color-palette"
     ],
     "ignoreFiles": [],
-    "ignoreValues": []
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "src/pages/admin/AdminCustomersPage.jsx"
+        ],
+        "createdAt": "2026-08-16T17:45:42.847Z",
+        "reason": "false positive: text-gray-400 pairs with hover:text-indigo-600 on the same element, so gray text never actually renders on the indigo-50 hover background — the color swaps simultaneously with the background"
+      }
+    ]
   }
 }
