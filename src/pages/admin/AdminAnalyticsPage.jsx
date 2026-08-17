@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   BarChart3,
   Clock,
@@ -21,8 +21,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { subscribeToAllOrders } from "../../services/firestore/orderService";
-import { getAllCustomers } from "../../services/firestore/userService";
+import { useAdminData } from "../../contexts/AdminDataContext";
 import StatCard from "../../components/admin/StatCard";
 import PeakHoursHeatmap from "../../components/admin/PeakHoursHeatmap";
 import { getOrderDate, getDayKey, getMonthKey, MONTH_NAMES } from "../../utils/date";
@@ -133,20 +132,10 @@ const SectionCard = ({ title, caption, icon: Icon, action, children }) => (
 );
 
 const AdminAnalyticsPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState(null);
+  const { orders, customers } = useAdminData();
   const [range, setRange] = useState("30d");
   const [trendMetric, setTrendMetric] = useState("revenue");
   const [servicesMetric, setServicesMetric] = useState("qty");
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAllOrders(setOrders);
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    getAllCustomers().then((c) => setCustomers(Array.isArray(c) ? c : []));
-  }, []);
 
   const rangeDays = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : null;
   const granularity = range === "12m" ? "month" : "day";

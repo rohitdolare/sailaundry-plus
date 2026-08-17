@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import {
-  getAllCustomers,
   updateUserVerified,
   getUserProfile,
   updateUserProfile,
   deleteUserProfile,
 } from "../../services/firestore";
+import { useAdminData } from "../../contexts/AdminDataContext";
 import { toast } from "react-hot-toast";
 import {
   Users,
@@ -30,8 +30,8 @@ const getInitials = (name) => {
 };
 
 const AdminCustomersPage = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { customers, customersLoading } = useAdminData();
+  const users = customers || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingUid, setUpdatingUid] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
@@ -40,23 +40,6 @@ const AdminCustomersPage = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [deletingUid, setDeletingUid] = useState(null);
   const [page, setPage] = useState(1);
-
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const list = await getAllCustomers();
-      setUsers(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load customers.");
-      setUsers([]);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -74,9 +57,6 @@ const AdminCustomersPage = () => {
     setUpdatingUid(u.uid);
     try {
       await updateUserVerified(u.uid, newVerified);
-      setUsers((prev) =>
-        prev.map((x) => (x.uid === u.uid ? { ...x, verified: newVerified } : x))
-      );
       toast.success(newVerified ? "Customer verified. They can now sign in." : "Customer unverified.");
     } catch (err) {
       console.error(err);
@@ -156,13 +136,6 @@ const AdminCustomersPage = () => {
         mobile: mobile || null,
         locations: locations.length ? locations : [],
       });
-      setUsers((prev) =>
-        prev.map((x) =>
-          x.uid === editingUser.uid
-            ? { ...x, name, mobile: mobile || x.mobile, locations }
-            : x
-        )
-      );
       toast.success("Customer updated.");
       closeEditModal();
     } catch (err) {
@@ -183,7 +156,6 @@ const AdminCustomersPage = () => {
     setDeletingUid(u.uid);
     try {
       await deleteUserProfile(u.uid);
-      setUsers((prev) => prev.filter((x) => x.uid !== u.uid));
       toast.success("Customer deleted.");
       setDeletingUid(null);
       return true;
@@ -232,7 +204,7 @@ const AdminCustomersPage = () => {
   const pageStart = (page - 1) * PAGE_SIZE;
   const pagedUsers = sortedUsers.slice(pageStart, pageStart + PAGE_SIZE);
 
-  if (loading) {
+  if (customersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600 dark:text-gray-400">Loading customers...</p>

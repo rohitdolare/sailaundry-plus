@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
-  getAllCustomers,
   getUserProfile,
   addOrder,
   updateOrder,
@@ -24,6 +23,7 @@ import {
   getCatalog,
   createWalkinUser,
 } from "../../services/firestore";
+import { useAdminData } from "../../contexts/AdminDataContext";
 
 const DEBOUNCE_MS = 350;
 
@@ -46,7 +46,8 @@ const AdminPlaceOrderPage = () => {
   const navigate = useNavigate();
   const isEditMode = !!orderId;
 
-  const [users, setUsers] = useState([]);
+  const { customers } = useAdminData();
+  const users = customers || [];
   const [customerSearch, setCustomerSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [customerListOpen, setCustomerListOpen] = useState(false);
@@ -77,16 +78,11 @@ const AdminPlaceOrderPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [userList, catalogData] = await Promise.all([
-          getAllCustomers(),
-          getCatalog(),
-        ]);
-        setUsers(Array.isArray(userList) ? userList : []);
+        const catalogData = await getCatalog();
         setCatalog(Array.isArray(catalogData) ? catalogData : []);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load users or catalog.");
-        setUsers([]);
+        toast.error("Failed to load catalog.");
         setCatalog([]);
       }
     };
@@ -277,10 +273,6 @@ const AdminPlaceOrderPage = () => {
             mobile,
             address: customerAddress.trim() || undefined,
           });
-          setUsers((prev) => [
-            ...prev,
-            { uid, name, mobile, role: "customer", isWalkIn: true, locations: customerAddress.trim() ? [{ label: "Default", address: customerAddress.trim() }] : [] },
-          ]);
         } catch (err) {
           console.error(err);
           toast.error("Failed to create customer.");

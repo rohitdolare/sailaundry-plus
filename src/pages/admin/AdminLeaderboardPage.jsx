@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Trophy, Package, IndianRupee, Medal, ChevronLeft, ChevronRight } from "lucide-react";
-import { subscribeToAllOrders } from "../../services/firestore/orderService";
-import { getAllCustomers } from "../../services/firestore/userService";
+import { useAdminData } from "../../contexts/AdminDataContext";
 import { getOrderDate, isSameMonth, MONTH_NAMES } from "../../utils/date";
 import { formatCurrency } from "../../utils/format";
 
@@ -17,8 +16,8 @@ const RANK_STYLES = [
 const PAGE_SIZE = 20;
 
 const AdminLeaderboardPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const { orders, customers: customersRaw } = useAdminData();
+  const customers = useMemo(() => customersRaw || [], [customersRaw]);
   const [range, setRange] = useState(RANGE.OVERALL);
   const [metric, setMetric] = useState(METRIC.ORDERS);
   const [chosenMonth, setChosenMonth] = useState(() => {
@@ -26,15 +25,6 @@ const AdminLeaderboardPage = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
   const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAllOrders(setOrders);
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    getAllCustomers().then((c) => setCustomers(Array.isArray(c) ? c : []));
-  }, []);
 
   const years = useMemo(() => {
     const y = new Date().getFullYear();

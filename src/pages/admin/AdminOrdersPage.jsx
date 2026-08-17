@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { subscribeToAllOrders, updateOrderStatus, deleteOrder } from "../../services/firestore/orderService";
+import { updateOrderStatus, deleteOrder } from "../../services/firestore/orderService";
 import { toast } from "react-hot-toast";
+import { useAdminData } from "../../contexts/AdminDataContext";
 import {
   CheckCircle,
   Plus,
@@ -117,7 +118,7 @@ const OrderCard = ({
 };
 
 const AdminOrdersPage = () => {
-  const [orders, setOrders] = useState([]);
+  const { orders } = useAdminData();
   const [updatingId, setUpdatingId] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("Pending");
@@ -128,11 +129,6 @@ const AdminOrdersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD, empty = all dates
   const filterRef = useRef(null);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAllOrders(setOrders);
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {

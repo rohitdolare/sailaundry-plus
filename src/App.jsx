@@ -29,6 +29,7 @@ import AdminRoute from "./components/AdminRoute";
 import { Toaster } from "react-hot-toast";
 import CatalogPage from "./pages/CatalogPage";
 import ProfilePage from "./pages/ProfilePage";
+import { AdminDataProvider } from "./contexts/AdminDataContext";
 
 function App() {
   return (
@@ -46,7 +47,9 @@ function App() {
           path="/admin"
           element={
             <AdminRoute>
-              <AdminLayout />
+              <AdminDataProvider>
+                <AdminLayout />
+              </AdminDataProvider>
             </AdminRoute>
           }
         >

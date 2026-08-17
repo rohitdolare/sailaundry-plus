@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Package, Clock, Users, Calendar, IndianRupee } from "lucide-react";
-import { subscribeToAllOrders } from "../../services/firestore/orderService";
-import { getAllCustomers } from "../../services/firestore/userService";
+import { useAdminData } from "../../contexts/AdminDataContext";
 import StatCard from "../../components/admin/StatCard";
 import { formatCurrency } from "../../utils/format";
 import {
@@ -27,8 +26,8 @@ const HERO_IMAGES = [
 const CAROUSEL_INTERVAL_MS = 4500;
 
 const AdminDashboard = () => {
-  const [orders, setOrders] = useState([]);
-  const [customerCount, setCustomerCount] = useState(null);
+  const { orders, customers } = useAdminData();
+  const customerCount = customers ? customers.length : null;
   const [period, setPeriod] = useState(PERIOD.TODAY);
   const [chosenDate, setChosenDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [chosenMonth, setChosenMonth] = useState(() => {
@@ -39,21 +38,10 @@ const AdminDashboard = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = subscribeToAllOrders(setOrders);
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
     const timer = setInterval(() => {
       setCarouselIndex((i) => (i + 1) % HERO_IMAGES.length);
     }, CAROUSEL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    getAllCustomers().then((customers) => {
-      setCustomerCount(Array.isArray(customers) ? customers.length : 0);
-    });
   }, []);
 
   const targetDay = useMemo(() => {

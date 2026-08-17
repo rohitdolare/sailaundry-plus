@@ -10,6 +10,7 @@ import {
   query,
   where,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -65,6 +66,21 @@ export const getAllCustomers = async () => {
     console.error("Error fetching customers (check Firestore rules):", error);
     return [];
   }
+};
+
+// 🔹 Subscribe to customer accounts (role !== "admin"), live updates
+export const subscribeToAllCustomers = (callback) => {
+  const q = query(collection(db, "users"), where("role", "!=", "admin"));
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      callback(snapshot.docs.map((d) => ({ uid: d.id, ...d.data() })));
+    },
+    (error) => {
+      console.error("Error in customers listener (check Firestore rules):", error);
+    }
+  );
+  return unsubscribe;
 };
 
 // 🔹 Get only admin accounts
