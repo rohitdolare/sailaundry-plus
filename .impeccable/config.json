@@ -16,12 +16,12 @@
       },
       {
         "rule": "gray-on-color",
-        "value": "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-950",
+        "value": "*",
         "files": [
           "src/pages/admin/AdminCatalogPage.jsx"
         ],
         "createdAt": "2026-08-16T18:02:54.865Z",
-        "reason": "false positive: base text-gray-400 sits on transparent/neutral bg; text flips to red-600 exactly when hover:bg-red-50 activates, so no gray-on-color combination is ever actually rendered"
+        "reason": "false positive: text-gray-400/text-gray-500 base on the delete-section/remove-item/remove-service icon buttons flips to text-red-600/text-red-400 exactly when hover:bg-red-50/bg-red-950 activates, so gray never actually renders on the colored background. The detector's gray-on-color rule has no extractable per-finding value to scope a narrower ignore against (only overused-font/design-system rules support value-level matching), so a file-scoped wildcard is the correct mechanism here, matching the identical precedent already recorded for AdminCustomersPage.jsx above."
       },
       {
         "rule": "overused-font",

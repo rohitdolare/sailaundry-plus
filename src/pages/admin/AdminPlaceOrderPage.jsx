@@ -12,7 +12,6 @@ import {
   ShoppingCart,
   ArrowRight,
   User,
-  Search,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
@@ -24,6 +23,8 @@ import {
   createWalkinUser,
 } from "../../services/firestore";
 import { useAdminData } from "../../contexts/AdminDataContext";
+import { sortSectionsByUsage } from "../../utils/sectionOrder";
+import ItemPickerModal from "../../components/ItemPickerModal";
 
 const DEBOUNCE_MS = 350;
 
@@ -69,7 +70,7 @@ const AdminPlaceOrderPage = () => {
   });
 
   const [catalog, setCatalog] = useState([]);
-  const [catalogSearch, setCatalogSearch] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
@@ -79,7 +80,7 @@ const AdminPlaceOrderPage = () => {
     const load = async () => {
       try {
         const catalogData = await getCatalog();
-        setCatalog(Array.isArray(catalogData) ? catalogData : []);
+        setCatalog(sortSectionsByUsage(Array.isArray(catalogData) ? catalogData : []));
       } catch (err) {
         console.error(err);
         toast.error("Failed to load catalog.");
@@ -217,6 +218,19 @@ const AdminPlaceOrderPage = () => {
         ...prev,
         { section: sectionName, item: itemName, service: service.type, quantity: 1, price: service.price || 0 },
       ];
+    });
+  };
+
+  const handleQuickRemove = (sectionName, itemName, serviceType) => {
+    setItems((prev) => {
+      const idx = prev.findIndex(
+        (i) => i.section === sectionName && i.item === itemName && i.service === serviceType
+      );
+      if (idx < 0) return prev;
+      if ((prev[idx].quantity || 1) <= 1) return prev.filter((_, i) => i !== idx);
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], quantity: updated[idx].quantity - 1 };
+      return updated;
     });
   };
 
@@ -489,85 +503,25 @@ const AdminPlaceOrderPage = () => {
 
           {/* Items */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-              <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
-              <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">Order items</h3>
-            </div>
-
-            {/* Catalog quick-add picker */}
-            <div className="space-y-3">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={catalogSearch}
-                  onChange={(e) => setCatalogSearch(e.target.value)}
-                  placeholder="Search items to add..."
-                  className="w-full rounded-xl border border-transparent bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
-                />
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                <ShoppingCart size={20} className="text-indigo-600 dark:text-indigo-400" />
+                <h3 className="font-heading text-lg font-bold text-gray-900 dark:text-gray-100">Order items</h3>
               </div>
-              <div className="max-h-72 overflow-y-auto space-y-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 p-4">
-                {(() => {
-                  const q = catalogSearch.trim().toLowerCase();
-                  const filteredCatalog = catalog
-                    .map((section) => ({
-                      ...section,
-                      items: section.items?.filter((it) => !q || it.name.toLowerCase().includes(q)) || [],
-                    }))
-                    .filter((section) => section.items.length > 0);
-                  if (filteredCatalog.length === 0) {
-                    return (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                        {catalog.length === 0 ? "Loading catalog..." : "No items match your search"}
-                      </p>
-                    );
-                  }
-                  return filteredCatalog.map((section) => (
-                    <div key={section.name} className="space-y-2">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        {section.name}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {section.items.map((it) =>
-                          it.services?.map((srv) => {
-                            const existing = items.find(
-                              (i) => i.section === section.name && i.item === it.name && i.service === srv.type
-                            );
-                            return (
-                              <button
-                                key={`${it.name}-${srv.type}`}
-                                type="button"
-                                onClick={() => handleQuickAdd(section.name, it.name, srv)}
-                                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                                  existing
-                                    ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900 dark:bg-opacity-30 dark:text-indigo-300"
-                                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:border-indigo-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                }`}
-                              >
-                                <Plus size={14} />
-                                {it.name} · {srv.type}
-                                <span className="text-gray-400 dark:text-gray-500">₹{srv.price}</span>
-                                {existing && (
-                                  <span className="ml-0.5 flex items-center justify-center min-w-[1.1rem] h-[1.1rem] rounded-full bg-indigo-600 text-white text-[10px] font-bold px-1">
-                                    {existing.quantity}
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  ));
-                })()}
-              </div>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-700 dark:text-indigo-300 text-sm font-semibold px-3 py-2 min-h-[40px] hover:bg-indigo-100 dark:hover:bg-opacity-40 transition"
+              >
+                <Plus size={16} /> Add items
+              </button>
             </div>
 
             {/* Added items */}
             <div className="space-y-3">
               {items.length === 0 ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-3">
-                  No items added yet — tap items above to add them
+                  No items added yet — tap &quot;Add items&quot; to get started
                 </p>
               ) : (
                 items.map((item, index) => (
@@ -651,6 +605,16 @@ const AdminPlaceOrderPage = () => {
           </button>
         </form>
       </div>
+
+      {pickerOpen && (
+        <ItemPickerModal
+          catalog={catalog}
+          items={items}
+          onQuickAdd={handleQuickAdd}
+          onQuickRemove={handleQuickRemove}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 };
