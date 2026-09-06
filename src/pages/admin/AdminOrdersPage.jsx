@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { updateOrderStatus, deleteOrder } from "../../services/firestore/orderService";
 import { toast } from "react-hot-toast";
 import { useAdminData } from "../../contexts/AdminDataContext";
+import { toWhatsAppNumber } from "../../utils/phone";
+import { buildOrderCompletedMessage } from "../../utils/whatsappMessage";
 import {
   CheckCircle,
   Plus,
@@ -205,14 +207,45 @@ const AdminOrdersPage = () => {
   })();
 
   const handleMarkDone = async (orderId) => {
+    const order = orders.find((o) => o.id === orderId);
+    // Open the tab synchronously (before any await) so browsers still treat
+    // it as opened in direct response to the click, not a blocked popup.
+    const waWindow = window.open("", "_blank");
     setUpdatingId(orderId);
     try {
       await updateOrderStatus(orderId, "Completed");
       toast.success("Order marked as completed.");
       setSelectedOrder(null);
+
+      const waNumber = order && toWhatsAppNumber(order.userMobile);
+      if (waNumber) {
+        const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(
+          buildOrderCompletedMessage(order)
+        )}`;
+        if (waWindow) {
+          waWindow.location.href = url;
+        } else {
+          // Popup was blocked — offer a manual link instead of failing silently.
+          toast((t) => (
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => toast.dismiss(t.id)}
+              className="underline font-medium"
+            >
+              Popup blocked — tap to send WhatsApp update
+            </a>
+          ));
+        }
+      } else {
+        waWindow?.close();
+        toast.error("Customer has no valid mobile number — WhatsApp message not sent.");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to update order.");
+      waWindow?.close();
     }
     setUpdatingId(null);
   };
