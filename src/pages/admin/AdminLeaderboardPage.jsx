@@ -18,7 +18,8 @@ const PAGE_SIZE = 20;
 const AdminLeaderboardPage = () => {
   const { orders, customers: customersRaw } = useAdminData();
   const customers = useMemo(() => customersRaw || [], [customersRaw]);
-  const [range, setRange] = useState(RANGE.OVERALL);
+  const [range, setRange] = useState(RANGE.THIS_MONTH);
+  const [showOverall, setShowOverall] = useState(false);
   const [metric, setMetric] = useState(METRIC.ORDERS);
   const [chosenMonth, setChosenMonth] = useState(() => {
     const d = new Date();
@@ -77,6 +78,12 @@ const AdminLeaderboardPage = () => {
   useEffect(() => {
     setPage(1);
   }, [range, metric, chosenMonth]);
+
+  useEffect(() => {
+    if (range !== RANGE.OVERALL) setShowOverall(false);
+  }, [range]);
+
+  const isGated = range === RANGE.OVERALL && !showOverall;
 
   const totalPages = Math.max(1, Math.ceil(leaderboard.length / PAGE_SIZE));
   const pageStart = (page - 1) * PAGE_SIZE;
@@ -149,6 +156,25 @@ const AdminLeaderboardPage = () => {
           </div>
         </section>
 
+        {isGated ? (
+          <section className="rounded-3xl border border-amber-200 dark:border-amber-900 dark:border-opacity-60 bg-amber-50 dark:bg-amber-950 dark:bg-opacity-30 shadow-lg px-6 py-10 flex flex-col items-center text-center gap-3">
+            <Trophy size={28} className="text-amber-500 dark:text-amber-400" />
+            <p className="font-heading font-semibold text-gray-900 dark:text-gray-100">
+              All-time leaderboard
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md">
+              Viewing all-time rankings recomputes stats across every order ever placed. Use sparingly.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowOverall(true)}
+              className="mt-1 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all"
+            >
+              Show all-time leaderboard
+            </button>
+          </section>
+        ) : (
+          <>
         {/* Top 3 podium cards */}
         {top3.length > 0 && (
           <section className="shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -277,6 +303,8 @@ const AdminLeaderboardPage = () => {
             </div>
           )}
         </section>
+          </>
+        )}
       </div>
     </div>
   );

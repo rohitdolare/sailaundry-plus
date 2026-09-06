@@ -1,10 +1,15 @@
-import { useEffect, useState, useRef, Fragment } from "react";
+import { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { updateOrderStatus, deleteOrder } from "../../services/firestore/orderService";
+import {
+  updateOrderStatus,
+  deleteOrder,
+  getOrdersFirstPage,
+  getOrdersPageAfter,
+} from "../../services/firestore/orderService";
 import { toast } from "react-hot-toast";
-import { useAdminData } from "../../contexts/AdminDataContext";
 import { toWhatsAppNumber } from "../../utils/phone";
 import { buildOrderCompletedMessage } from "../../utils/whatsappMessage";
+import usePullToRefresh from "../../hooks/usePullToRefresh";
 import {
   CheckCircle,
   Plus,
@@ -16,9 +21,11 @@ import {
   Loader2,
   Package,
   Eye,
+  RefreshCw,
 } from "lucide-react";
 import OrderDetailsModal from "../../components/OrderDetailsModal";
 
+const PAGE_SIZE = 30;
 const STATUS_OPTIONS = ["All", "Pending", "In Progress", "Completed", "Pending Pickup"];
 const SORT_OPTIONS = [
   { value: "date", label: "Date" },
@@ -120,7 +127,15 @@ const OrderCard = ({
 };
 
 const AdminOrdersPage = () => {
-  const { orders } = useAdminData();
+  // No live listener — orders are fetched once per filter change, and
+  // refreshed only on explicit user action (pull-to-refresh / Refresh
+  // button / "Load more"), so reads are bounded to what's actually requested.
+  const [orders, setOrders] = useState([]);
+  const [cursorDoc, setCursorDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [updatingId, setUpdatingId] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("Pending");
@@ -131,6 +146,70 @@ const AdminOrdersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD, empty = all dates
   const filterRef = useRef(null);
+  const requestIdRef = useRef(0);
+
+  const fetchFirstPage = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    try {
+      const { data, lastDoc, hasMore: more } = await getOrdersFirstPage(
+        { status: statusFilter, dayKey: dateFilter || null },
+        PAGE_SIZE
+      );
+      if (requestId !== requestIdRef.current) return; // a newer request superseded this one
+      setOrders(data);
+      setCursorDoc(lastDoc);
+      setHasMore(more);
+    } catch (err) {
+      console.error(err);
+      if (requestId === requestIdRef.current) toast.error("Failed to load orders.");
+    }
+  }, [statusFilter, dateFilter]);
+
+  // Fetch fresh whenever status/date filters change.
+  useEffect(() => {
+    setLoading(true);
+    fetchFirstPage().finally(() => setLoading(false));
+  }, [fetchFirstPage]);
+
+  const { pullDistance, refreshing, threshold } = usePullToRefresh(fetchFirstPage);
+
+  const handleRefreshClick = () => {
+    if (!refreshing && !loading) fetchFirstPage();
+  };
+
+  const handleLoadMore = async () => {
+    if (!cursorDoc || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const { data, lastDoc, hasMore: more } = await getOrdersPageAfter(
+        { status: statusFilter, dayKey: dateFilter || null },
+        cursorDoc,
+        PAGE_SIZE
+      );
+      setOrders((prev) => [...prev, ...data]);
+      setCursorDoc(lastDoc);
+      setHasMore(more);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load more orders.");
+    }
+    setLoadingMore(false);
+  };
+
+  // Optimistically reflect this session's own mutations, since nothing is
+  // live-subscribed anymore.
+  const patchOrderLocally = (orderId, patch) => {
+    const matchesFilter = (o) => statusFilter === "All" || (patch.status ?? o.status) === statusFilter;
+    setOrders((prev) =>
+      prev
+        .map((o) => (o.id === orderId ? { ...o, ...patch } : o))
+        .filter((o) => o.id !== orderId || matchesFilter(o))
+    );
+  };
+
+  const removeOrderLocally = (orderId) => {
+    setOrders((prev) => prev.filter((o) => o.id !== orderId));
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -167,12 +246,10 @@ const AdminOrdersPage = () => {
     return parts.join(" ").toLowerCase();
   };
 
+  // Status/date filtering already happened in the Firestore query itself
+  // (see getOrdersFirstPage) — only free-text search applies client-side,
+  // scoped to whatever's currently loaded.
   const filteredOrders = orders.filter((o) => {
-    if (statusFilter !== "All" && (o.status || "Pending") !== statusFilter) return false;
-    if (dateFilter) {
-      const orderDay = getDayKey(getOrderDate(o));
-      if (orderDay !== dateFilter) return false;
-    }
     if (!searchQuery.trim()) return true;
     const q = searchQuery.trim().toLowerCase();
     return orderToSearchText(o).includes(q);
@@ -214,6 +291,7 @@ const AdminOrdersPage = () => {
     setUpdatingId(orderId);
     try {
       await updateOrderStatus(orderId, "Completed");
+      patchOrderLocally(orderId, { status: "Completed" });
       toast.success("Order marked as completed.");
       setSelectedOrder(null);
 
@@ -262,6 +340,7 @@ const AdminOrdersPage = () => {
     setUpdatingId(order.id);
     try {
       await deleteOrder(order.id);
+      removeOrderLocally(order.id);
       toast.success("Order deleted.");
       setSelectedOrder(null);
     } catch (err) {
@@ -277,6 +356,18 @@ const AdminOrdersPage = () => {
 
   return (
     <div className="w-full transition-colors duration-300">
+      {/* Pull-to-refresh indicator */}
+      {(pullDistance > 0 || refreshing) && (
+        <div
+          className="flex items-center justify-center overflow-hidden transition-[height]"
+          style={{ height: refreshing ? 40 : Math.min(pullDistance, 40) }}
+        >
+          <RefreshCw
+            size={18}
+            className={`text-indigo-500 dark:text-indigo-400 ${refreshing || pullDistance >= threshold ? "animate-spin" : ""}`}
+          />
+        </div>
+      )}
       <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
         {/* Top section: title + search/filter — stacked on mobile for cleaner layout */}
         <div className="flex flex-col gap-3 mb-3">
@@ -286,12 +377,22 @@ const AdminOrdersPage = () => {
                 Orders
               </h1>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+                {filteredOrders.length}{hasMore && !searchQuery.trim() ? "+" : ""} order{filteredOrders.length !== 1 ? "s" : ""}
                 {statusFilter !== "All" ? ` · ${statusFilter}` : ""}
                 {dateFilter ? ` · ${formatDayLabel(dateFilter)}` : ""}
                 {searchQuery.trim() ? " (filtered)" : ""}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={handleRefreshClick}
+              disabled={loading || refreshing}
+              title="Refresh orders"
+              aria-label="Refresh orders"
+              className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              <RefreshCw size={16} className={loading || refreshing ? "animate-spin" : ""} />
+            </button>
           </div>
           <div className="flex items-center gap-2 w-full">
             <div className="relative flex-1 min-w-0 flex items-center">
@@ -396,7 +497,11 @@ const AdminOrdersPage = () => {
 
         {/* Mobile: card list — no table, no horizontal scroll */}
         <div className="md:hidden">
-          {sortedOrders.length === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400 rounded-2xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60">
+              Loading orders…
+            </div>
+          ) : sortedOrders.length === 0 ? (
             <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400 rounded-2xl bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60">
               {searchQuery.trim() ? "No orders match your search." : statusFilter === "All" ? "No orders yet." : `No orders with status "${statusFilter}".`}
             </div>
@@ -446,7 +551,11 @@ const AdminOrdersPage = () => {
 
         {/* Desktop: compact 3-column table — combined columns, no horizontal scroll */}
         <div className="hidden md:block bg-white bg-opacity-60 dark:bg-gray-900 dark:bg-opacity-60 backdrop-blur-xl backdrop-filter border border-white border-opacity-60 dark:border-gray-800 dark:border-opacity-60 rounded-3xl shadow-lg overflow-hidden">
-          {sortedOrders.length === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+              Loading orders…
+            </div>
+          ) : sortedOrders.length === 0 ? (
             <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
               {searchQuery.trim() ? "No orders match your search." : statusFilter === "All" ? "No orders yet." : `No orders with status "${statusFilter}".`}
             </div>
@@ -569,6 +678,20 @@ const AdminOrdersPage = () => {
             </div>
           )}
         </div>
+
+        {hasMore && !loading && (
+          <div className="flex justify-center mt-4">
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              {loadingMore && <Loader2 size={14} className="animate-spin" />}
+              {loadingMore ? "Loading…" : "Load more"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Floating New Order button – bottom right */}

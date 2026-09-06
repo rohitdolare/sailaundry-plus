@@ -12,6 +12,9 @@ import {
   where,
   getDocs,
   onSnapshot,
+  limit,
+  orderBy,
+  startAfter,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -88,6 +91,54 @@ export const subscribeToAllOrders = (callback) => {
     callback(data);
   });
   return unsubscribe;
+};
+
+// Shared filter constraints for the admin Orders page: optional status
+// equality + optional single-day createdAt range, always ordered newest-first.
+function buildOrdersConstraints({ status, dayKey }) {
+  const constraints = [];
+  if (status && status !== "All") constraints.push(where("status", "==", status));
+  if (dayKey) {
+    constraints.push(where("createdAt", ">=", new Date(`${dayKey}T00:00:00`)));
+    constraints.push(where("createdAt", "<=", new Date(`${dayKey}T23:59:59.999`)));
+  }
+  constraints.push(orderBy("createdAt", "desc"));
+  return constraints;
+}
+
+// 🔹 Admin Orders page: one-time fetch of the first bounded page matching
+// filters (status/day), instead of reading the whole collection. No live
+// listener — the page re-fetches on filter change, pull-to-refresh, or
+// "Load more". Firestore requires a composite index for status+createdAt
+// combos — the console will print a one-click "create index" link the
+// first time this runs if missing.
+export const getOrdersFirstPage = async ({ status, dayKey }, pageSize) => {
+  const q = query(collection(db, "orders"), ...buildOrdersConstraints({ status, dayKey }), limit(pageSize));
+  const snapshot = await getDocs(q);
+  const docs = snapshot.docs;
+  return {
+    data: docs.map((d) => ({ id: d.id, ...d.data() })),
+    lastDoc: docs[docs.length - 1] || null,
+    hasMore: docs.length === pageSize,
+  };
+};
+
+// 🔹 Admin Orders page: one-time fetch of the next page after a cursor doc
+// ("Load more") — reads only the new page, never re-reads prior pages.
+export const getOrdersPageAfter = async ({ status, dayKey }, cursorDoc, pageSize) => {
+  const q = query(
+    collection(db, "orders"),
+    ...buildOrdersConstraints({ status, dayKey }),
+    startAfter(cursorDoc),
+    limit(pageSize)
+  );
+  const snapshot = await getDocs(q);
+  const docs = snapshot.docs;
+  return {
+    data: docs.map((d) => ({ id: d.id, ...d.data() })),
+    lastDoc: docs[docs.length - 1] || null,
+    hasMore: docs.length === pageSize,
+  };
 };
 
 // 🔹 Get order by ID
