@@ -2,22 +2,24 @@ import { describe, it, expect } from "vitest";
 import { buildOrderCompletedMessage } from "./whatsappMessage";
 
 describe("buildOrderCompletedMessage", () => {
-  it("includes the customer name, order number, items and amount", () => {
+  it("includes the order number, items and amount", () => {
     const msg = buildOrderCompletedMessage({
       userName: "Rohit",
       orderNumber: 42,
       totalAmount: 250,
       items: [{ quantity: 2, item: "Shirt" }],
     });
-    expect(msg).toContain("Rohit");
     expect(msg).toContain("#42");
     expect(msg).toContain("₹250");
     expect(msg).toContain("2 × Shirt");
   });
 
-  it("falls back to a generic greeting when userName is missing", () => {
-    const msg = buildOrderCompletedMessage({ orderNumber: 1 });
-    expect(msg).toContain("ग्राहक");
+  it("uses a generic greeting regardless of userName, since a customer-entered name can be misspelled/malformed", () => {
+    const withName = buildOrderCompletedMessage({ userName: "R0h1t!!", orderNumber: 1 });
+    const withoutName = buildOrderCompletedMessage({ orderNumber: 1 });
+    expect(withName).toContain("नमस्कार!");
+    expect(withName).not.toContain("R0h1t");
+    expect(withoutName).toContain("नमस्कार!");
   });
 
   it("falls back to the doc id when orderNumber is missing", () => {

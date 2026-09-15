@@ -2,7 +2,6 @@
 // order is marked Completed. Includes the order number, item list, and
 // total so the customer can recognize which order this is.
 export const buildOrderCompletedMessage = (order) => {
-  const name = order.userName || "ग्राहक";
   const orderNo = order.orderNumber ?? order.id;
   const amount = order.totalAmount != null ? `₹${order.totalAmount}` : "";
   const itemsBlock =
@@ -11,7 +10,7 @@ export const buildOrderCompletedMessage = (order) => {
       : "";
 
   const blocks = [
-    `नमस्कार ${name}! 👋`,
+    `नमस्कार! 👋`,
     `तुमचे कपडे तयार झाले आहेत! 🎉\nऑर्डर #${orderNo} आता ✅ पूर्ण झाली आहे.`,
     itemsBlock,
     amount ? `एकूण रक्कम: ${amount} 💰` : "",
