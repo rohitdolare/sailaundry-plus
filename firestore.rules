@@ -2,35 +2,67 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Only ever calls get() on the requester's own doc, so this is cheap
+    // (Firestore dedupes/caches identical get() calls within one request)
+    // even when used inside a list/query rule evaluated per-document.
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     match /counters/{counterId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      // Order-number counter: only allow a monotonic +1-style integer write,
+      // so a non-admin customer placing an order can still bump it, but
+      // can't reset/corrupt it to an arbitrary or lower value.
+      allow write: if isSignedIn()
+        && request.resource.data.value is int
+        && request.resource.data.value > 0
+        && (!exists(/databases/$(database)/documents/counters/$(counterId))
+            || request.resource.data.value > resource.data.value);
     }
 
     match /catalog/{categoryId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && (
-        request.auth.uid == userId
-        || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
-      );
-      allow update: if request.auth != null && (
-        request.auth.uid == userId
-        || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
-      );
-      allow delete: if request.auth != null && (
-        request.auth.uid == userId
-        || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
-      );
+      allow read: if isSelf(userId) || isAdmin();
+
+      // Self-signup may only create a "customer, unverified" doc for itself;
+      // admins (walk-ins, etc.) can create any doc.
+      allow create: if isAdmin()
+        || (isSelf(userId)
+            && request.resource.data.role == 'customer'
+            && request.resource.data.verified == false);
+
+      // A user may update their own doc, but may not change their own role
+      // or verified status (that's how privilege escalation happened before).
+      // Admins may update any doc, including role/verified.
+      allow update: if isAdmin()
+        || (isSelf(userId)
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.verified == resource.data.verified);
+
+      allow delete: if isAdmin();
     }
 
     match /orders/{orderId} {
-      allow read, write: if request.auth != null;
+      // Customers can only read/create their own orders; only admins can
+      // read/create/update/delete everyone's orders.
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin() || (isSignedIn() && request.resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
     }
   }
 }

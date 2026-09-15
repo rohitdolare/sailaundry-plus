@@ -246,7 +246,7 @@ const AdminPlaceOrderPage = () => {
       : { label: "Walk-in", address: (customerAddress || "").trim() };
     return {
       uid,
-      userName: (selectedUserId ? (customerName || selectedUserProfile?.name) : customerSearch || "").trim(),
+      userName: (selectedUserId ? (customerName || selectedUserProfile?.name || "") : customerSearch || "").trim(),
       userMobile: (customerMobile || selectedUserProfile?.mobile || "").trim(),
       pickupLocation,
       pickupDate: formData.pickupDate,

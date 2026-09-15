@@ -1,6 +1,8 @@
 // src/contexts/AuthContext.jsx
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 const AuthContext = createContext();
 const LOCAL_STORAGE_KEY = "auth_user";
@@ -15,7 +17,7 @@ const readStoredUser = () => {
     }
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     return null;
-  } catch (err) {
+  } catch {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     return null;
   }
@@ -32,7 +34,6 @@ export const  AuthProvider = ({ children }) => {
     const initial = readStoredUser();
     currentUidRef.current = initial?.uid ?? null;
     setUser(initial);
-    setLoading(false);
 
     // Re-sync whenever the session in localStorage changes from under this
     // tab — e.g. another tab/window on the same device logs out and signs
@@ -64,10 +65,26 @@ export const  AuthProvider = ({ children }) => {
     window.addEventListener("storage", onStorage);
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("focus", syncFromStorage);
+
+    // Firebase Auth is the real source of truth for whether a session is
+    // still valid — our cached localStorage profile is only a convenience
+    // for the role/name/etc. it carries. If Firebase reports signed-out
+    // (expired/revoked token, cleared persistence, forged/stray local
+    // data...) we must not go on trusting the cached session.
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        currentUidRef.current = null;
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
     return () => {
       window.removeEventListener("storage", onStorage);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("focus", syncFromStorage);
+      unsubscribeAuth();
     };
   }, []);
 
@@ -85,6 +102,9 @@ export const  AuthProvider = ({ children }) => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     currentUidRef.current = null;
     setUser(null);
+    // Previously this only cleared local state, leaving the real Firebase
+    // Auth session alive — actually end it too.
+    signOut(auth).catch((err) => console.error("Firebase sign-out failed:", err));
   };
 
   return (
