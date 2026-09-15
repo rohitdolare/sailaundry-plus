@@ -283,7 +283,7 @@ const AdminCustomersPage = () => {
                         className="border-b border-gray-50 dark:border-gray-800 dark:border-opacity-50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:bg-opacity-40 transition"
                       >
                         <td className="py-2.5 px-5 font-medium text-gray-500 dark:text-gray-400 tabular-nums">
-                          {pageStart + i + 1}
+                          {sortedUsers.length - (pageStart + i)}
                         </td>
                         <td className="py-2.5 px-5">
                           <button
