@@ -62,7 +62,7 @@ const MainLayout = () => {
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 md:flex-row">
       {/* Header */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-indigo-900 px-4 py-3 shadow-md">
+      <header className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between bg-indigo-900 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] shadow-md">
         <h2 className="font-heading text-lg font-bold tracking-tight truncate text-white">
           Sai Laundry+
         </h2>
@@ -185,7 +185,7 @@ const MainLayout = () => {
       </aside>
 
       {/* Main Content - pt-16 for fixed header, pb-20 on mobile for bottom bar */}
-      <main className="flex-1 overflow-auto pt-16 pb-20 md:pb-0 md:ml-16 transition-colors duration-300">
+      <main className="flex-1 overflow-auto pt-[calc(4rem+env(safe-area-inset-top))] pb-20 md:pb-0 md:ml-16 transition-colors duration-300">
         <Outlet />
       </main>
 
