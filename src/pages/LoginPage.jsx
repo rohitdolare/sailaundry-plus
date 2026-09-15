@@ -78,6 +78,12 @@ const LoginPage = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
+      {/* Status bar backdrop so white iOS status bar icons stay legible over the safe area */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 bg-indigo-900"
+        style={{ height: "env(safe-area-inset-top)" }}
+        aria-hidden="true"
+      />
       {/* Decorative background mesh */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-300 bg-opacity-30 blur-3xl dark:bg-opacity-20" />
