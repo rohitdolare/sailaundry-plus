@@ -33,4 +33,11 @@ describe("buildOrderCompletedMessage", () => {
     expect(msg).not.toContain("₹");
     expect(msg).not.toContain("\n\n\n");
   });
+
+  it("always includes the pickup time window", () => {
+    const msg = buildOrderCompletedMessage({ orderNumber: 1 });
+    expect(msg).toContain("पिकअप वेळ");
+    expect(msg).toContain("सकाळी ७:००–दुपारी १:००");
+    expect(msg).toContain("सायंकाळी ४:००–रात्री ९:००");
+  });
 });
