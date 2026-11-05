@@ -20,9 +20,13 @@ import {
   ChevronRight,
   Pencil,
   Search,
+  UserPlus,
 } from "lucide-react";
+import { saveContact } from "../../utils/contact";
 
 const PAGE_SIZE = 20;
+// Verified toggle + Walk-in tag are hidden for now; flip to true to bring them back.
+const SHOW_STATUS = false;
 
 const getInitials = (name) => {
   if (!name) return "?";
@@ -53,6 +57,11 @@ const AdminCustomersPage = () => {
       };
     }
   }, [editingUser]);
+
+  const handleSaveContact = async (u) => {
+    const ok = await saveContact(u);
+    if (!ok) toast.error("Invalid mobile number.");
+  };
 
   const handleToggleVerified = async (u) => {
     const newVerified = !(u.verified === true);
@@ -260,21 +269,23 @@ const AdminCustomersPage = () => {
             </div>
 
             <div className="overflow-x-auto min-h-0 flex-1">
-              <table className="w-full text-sm min-w-[720px]">
+              <table className={`w-full text-sm ${SHOW_STATUS ? "min-w-[720px]" : "min-w-[600px]"}`}>
                 <thead>
                   <tr className="border-b border-gray-100 dark:border-gray-800 dark:border-opacity-80">
                     <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400 w-10">#</th>
                     <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Customer</th>
                     <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Contact</th>
                     <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Joined</th>
-                    <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Status</th>
+                    {SHOW_STATUS && (
+                      <th className="text-left py-2 px-5 font-semibold text-gray-500 dark:text-gray-400">Status</th>
+                    )}
                     <th className="py-2 px-5"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 px-5 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={SHOW_STATUS ? 6 : 5} className="py-8 px-5 text-center text-gray-500 dark:text-gray-400">
                         No customers match &quot;{searchQuery.trim()}&quot;.
                       </td>
                     </tr>
@@ -301,7 +312,7 @@ const AdminCustomersPage = () => {
                               <span className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
                                 {u.name || "—"}
                               </span>
-                              {u.isWalkIn && (
+                              {SHOW_STATUS && u.isWalkIn && (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0 font-medium">
                                   Walk-in
                                 </span>
@@ -323,11 +334,23 @@ const AdminCustomersPage = () => {
                                 <Phone size={14} />
                               </a>
                             )}
+                            {(u.mobile || u.phone) && (
+                              <button
+                                type="button"
+                                onClick={() => handleSaveContact(u)}
+                                className="flex items-center justify-center w-7 h-7 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900 dark:hover:bg-opacity-30 transition shrink-0"
+                                aria-label={`Save ${u.name || "customer"} to contacts`}
+                                title="Save to contacts"
+                              >
+                                <UserPlus size={14} />
+                              </button>
+                            )}
                           </div>
                         </td>
                         <td className="py-2.5 px-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
                           {getOnboardingDateKey(u)}
                         </td>
+                        {SHOW_STATUS && (
                         <td className="py-2.5 px-5">
                           <button
                             type="button"
@@ -365,6 +388,7 @@ const AdminCustomersPage = () => {
                             </span>
                           </button>
                         </td>
+                        )}
                         <td className="py-2.5 px-5 text-right">
                           <button
                             type="button"

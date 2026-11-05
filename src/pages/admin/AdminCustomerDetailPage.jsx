@@ -13,7 +13,10 @@ import {
   ChevronLeft,
   ChevronRight,
   UserX,
+  UserPlus,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { saveContact } from "../../utils/contact";
 import { useAdminData } from "../../contexts/AdminDataContext";
 import { getCustomerStats, ORDER_STATUSES } from "../../utils/customerStats";
 import { getOrderDate } from "../../utils/date";
@@ -22,6 +25,8 @@ import StatCard from "../../components/admin/StatCard";
 import OrderDetailsModal from "../../components/OrderDetailsModal";
 
 const PAGE_SIZE = 20;
+// Verified/Walk-in badges hidden for now (matches the Customers list).
+const SHOW_STATUS = false;
 
 const STATUS_STYLES = {
   Pending: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
@@ -66,6 +71,11 @@ const AdminCustomerDetailPage = () => {
   const name = customer?.name || stats.orders[0]?.userName || "Unknown customer";
   const mobile = customer?.mobile || stats.orders[0]?.userMobile || "";
 
+  const handleSaveContact = async () => {
+    const ok = await saveContact({ ...customer, name, mobile });
+    if (!ok) toast.error("Invalid mobile number.");
+  };
+
   const totalPages = Math.max(1, Math.ceil(stats.orders.length / PAGE_SIZE));
   const pageStart = (page - 1) * PAGE_SIZE;
   const pagedOrders = stats.orders.slice(pageStart, pageStart + PAGE_SIZE);
@@ -95,12 +105,12 @@ const AdminCustomerDetailPage = () => {
                   <h1 className="font-heading text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
                     {loading ? "Loading…" : name}
                   </h1>
-                  {customer?.isWalkIn && (
+                  {SHOW_STATUS && customer?.isWalkIn && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0 font-medium">
                       Walk-in
                     </span>
                   )}
-                  {customer && !customer.isWalkIn && (
+                  {SHOW_STATUS && customer && !customer.isWalkIn && (
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 font-medium ${
                         customer.verified === true
@@ -122,6 +132,17 @@ const AdminCustomerDetailPage = () => {
                 >
                   <Phone size={14} /> <span className="hidden sm:inline">Call</span>
                 </a>
+              )}
+              {mobile && (
+                <button
+                  type="button"
+                  onClick={handleSaveContact}
+                  aria-label={`Save ${name} to contacts`}
+                  title="Save to contacts"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition shrink-0"
+                >
+                  <UserPlus size={14} /> <span className="hidden sm:inline">Save</span>
+                </button>
               )}
             </>
           )}
