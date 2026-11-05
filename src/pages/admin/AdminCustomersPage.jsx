@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   updateUserVerified,
   getUserProfile,
@@ -31,6 +32,7 @@ const getInitials = (name) => {
 
 const AdminCustomersPage = () => {
   const { customers, customersLoading } = useAdminData();
+  const navigate = useNavigate();
   const users = customers || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingUid, setUpdatingUid] = useState(null);
@@ -288,7 +290,8 @@ const AdminCustomersPage = () => {
                         <td className="py-2.5 px-5">
                           <button
                             type="button"
-                            onClick={() => openEditModal(u)}
+                            onClick={() => navigate(`/admin/customers/${u.uid}`)}
+                            title="View customer details"
                             className="flex items-center gap-3 text-left group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
                           >
                             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 text-indigo-600 dark:text-indigo-400 font-semibold text-xs shrink-0">

@@ -20,6 +20,7 @@ import AdminPlaceOrderPage from "./pages/admin/AdminPlaceOrderPage";
 import AdminCatalogPage from "./pages/admin/AdminCatalogPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import AdminLeaderboardPage from "./pages/admin/AdminLeaderboardPage";
+import AdminCustomerDetailPage from "./pages/admin/AdminCustomerDetailPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
 
 // Route Guards
@@ -58,6 +59,7 @@ function App() {
           <Route path="create-order/:orderId" element={<AdminPlaceOrderPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />
+          <Route path="customers/:uid" element={<AdminCustomerDetailPage />} />
           <Route path="leaderboard" element={<AdminLeaderboardPage />} />
           <Route path="profile" element={<AdminProfilePage />} />
         </Route>

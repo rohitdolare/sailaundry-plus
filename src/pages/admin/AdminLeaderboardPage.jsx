@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Trophy, Package, IndianRupee, Medal, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdminData } from "../../contexts/AdminDataContext";
 import { getOrderDate, isSameMonth, MONTH_NAMES } from "../../utils/date";
@@ -188,7 +189,12 @@ const AdminLeaderboardPage = () => {
                     {i + 1}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-heading font-semibold text-gray-900 dark:text-gray-100 truncate">{row.name}</p>
+                    <Link
+                      to={`/admin/customers/${row.uid}`}
+                      className="block font-heading font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                    >
+                      {row.name}
+                    </Link>
                     {row.mobile && (
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{row.mobile}</p>
                     )}
@@ -263,7 +269,12 @@ const AdminLeaderboardPage = () => {
                     <tr key={row.uid} className="border-b border-gray-50 dark:border-gray-800 dark:border-opacity-50 last:border-0">
                       <td className="py-2 px-5 font-medium text-gray-500 dark:text-gray-400 tabular-nums">{pageStart + i + 1}</td>
                       <td className="py-2 px-5">
-                        <p className="font-medium text-gray-800 dark:text-gray-200 truncate">{row.name}</p>
+                        <Link
+                          to={`/admin/customers/${row.uid}`}
+                          className="block font-medium text-gray-800 dark:text-gray-200 truncate hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                        >
+                          {row.name}
+                        </Link>
                         {row.mobile && <p className="text-xs text-gray-500 dark:text-gray-400">{row.mobile}</p>}
                       </td>
                       <td className="py-2 px-5 text-right tabular-nums text-gray-800 dark:text-gray-200">{row.orders}</td>
