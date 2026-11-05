@@ -1,37 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildVCard, buildAndroidContactIntent, getPlatform } from "./contact";
-
-describe("buildAndroidContactIntent", () => {
-  it("builds an INSERT intent with name, +91 mobile and address", () => {
-    const url = buildAndroidContactIntent({ name: "Omkar Rathod", mobile: "9822913223", address: "Lane 3, Pune" });
-    expect(url).toBe(
-      "intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;" +
-        "S.name=Omkar%20Rathod;S.phone=%2B919822913223;i.phone_type=2;S.postal=Lane%203%2C%20Pune;end"
-    );
-  });
-
-  it("encodes semicolons so they can't break the intent", () => {
-    expect(buildAndroidContactIntent({ name: "A;B", mobile: "9822913223" })).toContain("S.name=A%3BB;");
-  });
-
-  it("omits empty name and address", () => {
-    const url = buildAndroidContactIntent({ name: " ", mobile: "9822913223" });
-    expect(url).not.toContain("S.name");
-    expect(url).not.toContain("S.postal");
-  });
-
-  it("returns null for invalid numbers", () => {
-    expect(buildAndroidContactIntent({ name: "A", mobile: "12" })).toBeNull();
-  });
-});
-
-describe("getPlatform", () => {
-  it("detects Android, iPhone and desktop", () => {
-    expect(getPlatform("Mozilla/5.0 (Linux; Android 14; Pixel 8) Chrome/130")).toBe("android");
-    expect(getPlatform("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)")).toBe("ios");
-    expect(getPlatform("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130")).toBe("desktop");
-  });
-});
+import { buildVCard } from "./contact";
 
 describe("buildVCard", () => {
   it("builds a vCard with name and +91 number", () => {

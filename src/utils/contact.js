@@ -34,62 +34,28 @@ export const buildVCard = ({ name, mobile, address } = {}) => {
 const fileName = (name) => `${(name || "contact").trim().replace(/[^\w\- ]+/g, "").replace(/\s+/g, "_") || "contact"}.vcf`;
 
 /**
- * Android Chrome "intent:" URL that opens the native Contacts "Create contact"
- * screen pre-filled (ContactsContract.Intents.Insert extras). Null if mobile invalid.
- */
-export const buildAndroidContactIntent = ({ name, mobile, address } = {}) => {
-  const wa = toWhatsAppNumber(mobile);
-  if (!wa) return null;
-  const enc = (v) => encodeURIComponent(String(v));
-  const parts = [
-    "intent:#Intent",
-    "action=android.intent.action.INSERT",
-    "type=vnd.android.cursor.dir/contact",
-  ];
-  const fullName = (name || "").trim();
-  if (fullName) parts.push(`S.name=${enc(fullName)}`);
-  parts.push(`S.phone=${enc(`+${wa}`)}`, "i.phone_type=2"); // 2 = mobile
-  if (address && String(address).trim()) parts.push(`S.postal=${enc(String(address).trim())}`);
-  parts.push("end");
-  return parts.join(";");
-};
-
-export const getPlatform = (ua = typeof navigator !== "undefined" ? navigator.userAgent : "") => {
-  if (/android/i.test(ua)) return "android";
-  // iPadOS 13+ reports as Mac; detect via touch support.
-  if (/iphone|ipad|ipod/i.test(ua)) return "ios";
-  if (/macintosh/i.test(ua) && typeof navigator !== "undefined" && navigator.maxTouchPoints > 1) return "ios";
-  return "desktop";
-};
-
-/**
- * Save a customer to the device's contacts.
- * - Android: opens the Contacts app's "Create contact" screen directly.
- * - iOS: opens the vCard in-page so Safari shows "Create New Contact".
- * - Desktop: downloads a .vcf file.
+ * Save a customer to the device's contacts: share sheet on mobile, .vcf download elsewhere.
  * @returns {Promise<boolean>} false when the mobile number is invalid
  */
 export const saveContact = async (customer) => {
   const address = customer?.address || customer?.locations?.[0]?.address || "";
-  const details = { name: customer?.name, mobile: customer?.mobile || customer?.phone, address };
-  const vcf = buildVCard(details);
+  const vcf = buildVCard({ name: customer?.name, mobile: customer?.mobile || customer?.phone, address });
   if (!vcf) return false;
-
-  const platform = getPlatform();
-
-  if (platform === "android") {
-    window.location.href = buildAndroidContactIntent(details);
-    return true;
-  }
-
-  if (platform === "ios") {
-    // Navigating to a vCard (no download attribute) makes iOS show the contact card.
-    window.location.href = `data:text/vcard;charset=utf-8,${encodeURIComponent(vcf)}`;
-    return true;
-  }
 
   const name = fileName(customer?.name);
   const blob = new Blob([vcf], { type: "text/vcard" });
+
+  try {
+    const file = new File([blob], name, { type: "text/vcard" });
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: customer?.name || "Contact" });
+      return true;
+    }
+  } catch (err) {
+    if (err?.name === "AbortError") return true; // user cancelled share sheet
+    // otherwise fall through to download
+  }
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
